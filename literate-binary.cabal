@@ -1,0 +1,24 @@
+name:                literate-binary
+version:             0.0.0
+synopsis:            Integrate handcrafted binary and documentation
+homepage:            https://github.com/marhop/literate-binary
+license:             MIT
+license-file:        LICENSE
+author:              Martin Hoppenheit
+maintainer:          martin@hoppenheit.info
+copyright:           2018 Martin Hoppenheit
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable lb
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , bytestring
+                     , string-conversions
+                     , base16-bytestring
+                     , pandoc
+                     , pandoc-types
