@@ -2,7 +2,9 @@ This file describes a simple BMP, or Bitmap Image File in hexadecimal notation.
 It can be "compiled" in two ways:
 
  1. Into a PDF/HTML/Latex ... file, using a Markdown converter like Pandoc.
- 2. Into a binary BMP file, using TODO.
+ 2. Into a binary BMP file, using [lb].
+
+[lb]: https://github.com/marhop/literate-binary
 
 # BMP File Example
 

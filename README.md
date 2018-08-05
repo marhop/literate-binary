@@ -14,8 +14,8 @@ the same source file? There is!
 
 Just write a [Markdown] file [like this example][example]. Run it through your
 favourite Markdown converter (mine is [Pandoc]) to create a pretty HTML or PDF
-document; run it through the [`lb` tool][lb] to create a binary file from its
-hex content.
+document; run it through [`lb`][lb] to create a binary file from its hex
+content.
 
                     pandoc -> documentation.{html,pdf,docx,...}
                   /
@@ -38,7 +38,8 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
 
 # Usage
 
-TODO Coming soon ...
+    $ lb --help
+    $ lb source.bmp.md --output binary.bmp
 
 [Markdown]: https://daringfireball.net/projects/markdown/basics
 [Pandoc]: https://pandoc.org
