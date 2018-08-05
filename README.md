@@ -41,8 +41,22 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
     $ lb --help
     $ lb source.bmp.md --output binary.bmp
 
+# Building from source
+
+This tool is written in Haskell. It is recommended to use [Stack] for building.
+Install Stack, clone the Git repository, change to its top level directory and
+run the following commands:
+
+    $ stack setup
+    $ stack build
+    $ stack install
+
+On Linux, this will install the `lb` executable to `~/.local/bin/` and on
+Windows, well, I don't know but surely somewhere sensible.
+
 [Markdown]: https://daringfireball.net/projects/markdown/basics
 [Pandoc]: https://pandoc.org
 [lb]: https://github.com/marhop/literate-binary
 [example]: examples/minimal.bmp.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
+[Stack]: https://docs.haskellstack.org/
