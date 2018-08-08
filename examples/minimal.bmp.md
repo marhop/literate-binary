@@ -19,7 +19,7 @@ device independent bitmap header (sometimes called bitmap information header).
     the actual image data in the file.
 
         424d     # magic number
-        46000000 # file size
+        00865802 # file size
         00000000 # application specific (unused)
         36000000 # offset of image data
 
@@ -27,12 +27,12 @@ device independent bitmap header (sometimes called bitmap information header).
     color information, can be found in the second header.
 
         28000000 # header size
-        02000000 # image width
-        02000000 # image height
+        e2000000 # image width
+        e2000000 # image height
         0100     # number of color planes
         1800     # number of bits per pixel
         00000000 # compression type of image data (0 = uncompressed)
-        10000000 # size of image data (including padding)
+        00505802 # size of image data (including padding)
         130b0000 # horizontal print resolution, pixels/metre
         130b0000 # vertical print resolution, pixels/metre
         00000000 # number of colors in palette
@@ -42,7 +42,8 @@ Explaining the meaning of all fields in the second header is beyond the scope of
 this example because it is not meant to be an introduction to the BMP format but
 merely to show how a literate binary file could look like. Some hints, however:
 
-  * Width and height are given in pixels, so this is a 2x2 pixels image.
+  * Width and height are given in pixels, so this is a 226x226 pixels image
+    (0xe2 = 226).
   * Most of the color stuff is either always the same (like number of color
     planes) or irrelevant in the present case (like number of colors in the
     palette because this file has no palette).
@@ -57,10 +58,10 @@ represented by a three byte blue/green/red value -- think RGB in little endian.
 Pixels are in bottom left to top right order, interspersed with padding (usually
 NULL bytes) to achieve a 4 byte alignment for each line of pixels. 
 
-    0000ff # red pixel
-    ffffff # white pixel
-    0000   # padding
-    ff0000 # blue pixel
-    00ff00 # green pixel
-    0000   # padding
+    (
+    (0000ff){113} # 113 red pixels
+    (ffffff){113} # 113 white pixels
+    0000          # padding
+    ){113}        # 113 lines of red and white pixels
 
+    ( (ff0000){113} (00ff00){113} 0000 ){113} # same with blue and green pixels

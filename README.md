@@ -30,11 +30,17 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
 
   * The [`lb` (literate binary) tool][lb] expects a [Markdown] file as input.
   * All [code blocks] in this file tied together form the content of the binary
-    file created by the `lb` tool. All other content including inline code in
-    backticks `` `like this` `` is ignored, only code blocks are relevant.
+    file created by `lb`. All other content including inline code in backticks
+    `` `like this` `` is ignored, only code blocks are relevant.
   * The code blocks must contain nothing but hex characters (upper or lower
-    case), whitespace and comments. Comments start with a `#` sign and end at
-    the end of the line. [Here is an example.][example]
+    case), macros, whitespace and comments.
+  * Macros are used to write long hex patterns in a compact way. They consist of
+    a sequence of hex characters and a quantifier, similar to regular expression
+    syntax. For example, the macro `(ff00){3}` expands to `ff00ff00ff00`. Macros
+    may be nested, like `(ff(00e2){2}00((21){4}03){12}){8}`.
+  * Comments start with a `#` sign and end at the end of the line.
+
+[Here is a complete example.][example]
 
 # Usage
 
