@@ -1,10 +1,12 @@
 This file describes a simple BMP, or Bitmap Image File in hexadecimal notation.
-It can be "compiled" in two ways:
+It is an example for a ["literate binary"][lb] file that integrates handcrafted
+binary and documentation. Two different representations can be derived from this
+file:
 
- 1. Into a PDF/HTML/Latex ... file, using a Markdown converter like Pandoc.
- 2. Into a binary BMP file, using [lb].
-
-[lb]: https://github.com/marhop/literate-binary
+ 1. A PDF/HTML/Latex ... file, using a Markdown converter like Pandoc.
+ 2. A binary BMP file, using [`lb`][lb]. This takes the hex code from all
+    Markdown code blocks and transforms it into binary that can be opened in any
+    suitable image viewer.
 
 # BMP File Example
 
@@ -23,6 +25,9 @@ device independent bitmap header (sometimes called bitmap information header).
         00000000 # application specific (unused)
         36000000 # offset of image data
 
+    Note that the preceding code block will be part of a binary file created by
+    [`lb`][lb]. Whitespace including linebreaks and comments will be ignored.
+
  2. Information about the image encoded in this file, such as dimensions and
     color information, can be found in the second header.
 
@@ -38,6 +43,8 @@ device independent bitmap header (sometimes called bitmap information header).
         00000000 # number of colors in palette
         00000000 # important colors (0 = all)
 
+    This code block will also be part of a binary file created by [`lb`][lb].
+
 Explaining the meaning of all fields in the second header is beyond the scope of
 this example because it is not meant to be an introduction to the BMP format but
 merely to show how a literate binary file could look like. Some hints, however:
@@ -49,14 +56,16 @@ merely to show how a literate binary file could look like. Some hints, however:
     palette because this file has no palette).
   * The number of bits per pixel (0x18 = 24) and the compression type
     (uncompressed) indicate what the image data in the next section should look
-    like: 3 bytes per pixel, without any compression.
+    like: three bytes per pixel, without any compression.
 
 ## Image Data
 
 The actual image data consists of an array of pixels with each pixel being
 represented by a three byte blue/green/red value -- think RGB in little endian.
-Pixels are in bottom left to top right order, interspersed with padding (usually
-NULL bytes) to achieve a 4 byte alignment for each line of pixels. 
+Pixels are in bottom left to top right order. They are interspersed with
+padding, usually NULL bytes, to achieve a four byte alignment for each line of
+pixels. (That means the number of bytes that encode one line of pixels should be
+divisible by four -- if it's not, NULL bytes are appended until it is.)
 
     (
     (0000ff){113} # 113 red pixels
@@ -64,4 +73,14 @@ NULL bytes) to achieve a 4 byte alignment for each line of pixels.
     0000          # padding
     ){113}        # 113 lines of red and white pixels
 
-    ( (ff0000){113} (00ff00){113} 0000 ){113} # same with blue and green pixels
+    # the same but with blue and green pixels
+    ( (ff0000){113} (00ff00){113} 0000 ){113}
+
+These two code blocks will also be part of a binary file created by [`lb`][lb].
+Note the use of hex macros: Where `0000ff` denotes three bytes that encode a
+single red pixel, `(0000ff){113}` denotes a sequence of 339 bytes (or 113
+repetitions of this three bytes sequence) that encode 113 red pixels. Macros may
+be nested, making it easy to create 113 lines of 113 red and 113 white pixels,
+resulting in a red and a white square next to each other.
+
+[lb]: https://github.com/marhop/literate-binary

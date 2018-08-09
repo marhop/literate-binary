@@ -7,7 +7,7 @@ about documentation? There is no way to enter inline comments or other
 explanatory prose in a hex editor, leading to separation of hex code and
 documentation. (Or worse, to no documentation at all.)
 
-Wouldn't it be great if there were a way to combine binary (expressed as hex
+Wouldn't it be great if there was a way to combine binary (expressed as hex
 code) and textual content in the same file? If both a binary file and
 accompanying documentation in formats like HTML or PDF could be generated from
 the same source file? There is!
@@ -34,13 +34,14 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
     `` `like this` `` is ignored, only code blocks are relevant.
   * The code blocks must contain nothing but hex characters (upper or lower
     case), macros, whitespace and comments.
-  * Macros are used to write long hex patterns in a compact way. They consist of
-    a sequence of hex characters and a quantifier, similar to regular expression
-    syntax. For example, the macro `(ff00){3}` expands to `ff00ff00ff00`. Macros
-    may be nested, like `(ff(00e2){2}00((21){4}03){12}){8}`.
+  * Macros are used to write long, repetitive hex patterns in a compact way.
+    They consist of a sequence of hex characters and a quantifier, similar to
+    regular expression syntax. For example, the macro `(ff00){3}` expands to
+    `ff00ff00ff00`. Macros may be nested, like
+    `(ff(00e2){2}00((21){4}03){12}){8}`.
   * Comments start with a `#` sign and end at the end of the line.
 
-[Here is a complete example.][example]
+[Here is a complete example][example] describing a simple Bitmap image file.
 
 # Usage
 
