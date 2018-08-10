@@ -14,6 +14,7 @@ file:
 
 A BMP file starts with two headers, the BMP, or bitmap header and the DIB, or
 device independent bitmap header (sometimes called bitmap information header).
+Numeric values are encoded in little endian byte order.
 
  1. The first header starts with the magic number `424d` (ASCII "BM") that helps
     to identify the file type, followed by the total size of the file in bytes,
@@ -21,7 +22,7 @@ device independent bitmap header (sometimes called bitmap information header).
     the actual image data in the file.
 
         424d     # magic number
-        00865802 # file size
+        86580200 # file size
         00000000 # application specific (unused)
         36000000 # offset of image data
 
@@ -37,7 +38,7 @@ device independent bitmap header (sometimes called bitmap information header).
         0100     # number of color planes
         1800     # number of bits per pixel
         00000000 # compression type of image data (0 = uncompressed)
-        00505802 # size of image data (including padding)
+        50580200 # size of image data (including padding)
         130b0000 # horizontal print resolution, pixels/metre
         130b0000 # vertical print resolution, pixels/metre
         00000000 # number of colors in palette
