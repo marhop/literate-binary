@@ -40,6 +40,9 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
     `ff00ff00ff00`. Macros may be nested, like
     `(ff(00e2){2}00((21){4}03){12}){8}`.
   * Comments start with a `#` sign and end at the end of the line.
+  * There is one exception to the "all code blocks" rule; [fenced code blocks]
+    with the `.nobin` class are ignored as well. This can be used to add code
+    other than binary, or to "comment out" a whole code block.
 
 [Here is a complete example][example] describing a simple Bitmap image file.
 
@@ -66,4 +69,5 @@ Windows, well, I don't know but surely somewhere sensible.
 [lb]: https://github.com/marhop/literate-binary
 [example]: examples/minimal.bmp.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
+[fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
 [Stack]: https://docs.haskellstack.org/

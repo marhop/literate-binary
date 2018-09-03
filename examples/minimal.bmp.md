@@ -1,7 +1,7 @@
 This file describes a simple BMP, or Bitmap Image File in hexadecimal notation.
 It is an example for a ["literate binary"][lb] file that integrates handcrafted
 binary and documentation. Two different representations can be derived from this
-file:
+file (see end of file for usage examples):
 
  1. A PDF/HTML/Latex ... file, using a Markdown converter like Pandoc.
  2. A binary BMP file, using [`lb`][lb]. This takes the hex code from all
@@ -83,5 +83,17 @@ single red pixel, `(0000ff){113}` denotes a sequence of 339 bytes (or 113
 repetitions of this three bytes sequence) that encode 113 red pixels. Macros may
 be nested, making it easy to create 113 lines of 113 red and 113 white pixels,
 resulting in a red and a white square next to each other.
+
+# Usage Example
+
+The following two commands convert this Markdown file to PDF and to BMP:
+
+~~~ {.nobin}
+$ pandoc minimal.bmp.md --output documentation.pdf
+$ lb minimal.bmp.md --output binary.bmp
+~~~
+
+Note that the preceding code block will *not* be part of a binary file created
+by [`lb`][lb]. It will be ignored because of the `.nobin` class.
 
 [lb]: https://github.com/marhop/literate-binary

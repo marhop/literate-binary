@@ -22,7 +22,9 @@ markdownCode :: T.Text -> Either T.Text T.Text
 markdownCode =
     bimap (cs . show) (T.unlines . query blocks) . P.readMarkdown P.def . cs
   where
-    blocks (P.CodeBlock _ s) = [cs s :: T.Text]
+    blocks (P.CodeBlock (_, classes, _) code)
+        | "nobin" `elem` classes = []
+        | otherwise = [cs code :: T.Text]
     blocks _ = []
 
 -- | Remove comments and whitespace including line breaks.
