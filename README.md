@@ -44,7 +44,8 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
     with the `.nobin` class are ignored as well. This can be used to add code
     other than binary, or to "comment out" a whole code block.
 
-[Here is a complete example][example] describing a simple Bitmap image file.
+[Here is a complete example][example] describing a simple Bitmap image file; and
+[here is another one][example-wav] describing a WAVE audio file.
 
 # Usage
 
@@ -68,6 +69,7 @@ Windows, well, I don't know but surely somewhere sensible.
 [Pandoc]: https://pandoc.org
 [lb]: https://github.com/marhop/literate-binary
 [example]: examples/minimal.bmp.md
+[example-wav]: examples/minimal.wav.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
 [fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
 [Stack]: https://docs.haskellstack.org/
