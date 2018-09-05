@@ -49,6 +49,8 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
 
 # Usage
 
+Get a binary [here][releases] and put it in your PATH. Then:
+
     $ lb --help
     $ lb source.bmp.md --output binary.bmp
 
@@ -68,6 +70,7 @@ Windows, well, I don't know but surely somewhere sensible.
 [Markdown]: https://daringfireball.net/projects/markdown/basics
 [Pandoc]: https://pandoc.org
 [lb]: https://github.com/marhop/literate-binary
+[releases]: https://github.com/marhop/literate-binary/releases
 [example]: examples/minimal.bmp.md
 [example-wav]: examples/minimal.wav.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
