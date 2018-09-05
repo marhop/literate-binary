@@ -64,8 +64,8 @@ run the following commands:
     $ stack build
     $ stack install
 
-On Linux, this will install the `lb` executable to `~/.local/bin/` and on
-Windows, well, I don't know but surely somewhere sensible.
+This will install the `lb` executable to `~/.local/bin/` on Linux and to
+`%AppData%\local\bin` on Windows.
 
 [Markdown]: https://daringfireball.net/projects/markdown/basics
 [Pandoc]: https://pandoc.org
