@@ -18,9 +18,11 @@ data Options = Options
 
 -- | Parse command line options.
 getOpts :: IO Options
-getOpts = execParser $ info (helper <*> options) (fullDesc <> header hdr)
+getOpts =
+    execParser $ info (helper <*> version <*> options) (fullDesc <> header hdr)
   where
     hdr = "lb - literate binary compiler"
+    version = infoOption "1.0.0" (long "version" <> help "Show version number")
     options = Options <$> input <*> output
     input =
         optional $
