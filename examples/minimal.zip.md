@@ -18,7 +18,7 @@ structure looks like this:
       * ...
       * end of central directory record
 
-There are several additional, optional records; see [[APPNOTE] section 4.3.6]
+There are several additional but optional records; see [[APPNOTE] section 4.3.6]
 for the complete list. Each record starts with the bytes `504b` (ASCII "PK") and
 another two bytes identifying the record type. [[APPNOTE] section 4.2]
 
@@ -100,7 +100,8 @@ This record is specified in [[APPNOTE] section 4.3.7].
     fields for different use cases like ZIP64 extended information or
     application specific data. Each extensible data field consists of a 2 bytes
     header ID, another 2 bytes that hold the data size and finally the field
-    specific data. This example has no extra field. [[APPNOTE] section 4.4.28]
+    specific data. This example has no extra field. [[APPNOTE] sections 4.4.28
+    and 4.5.1]
 
 ### File Data
 
@@ -146,16 +147,15 @@ feed.
 
 ## Central Directory
 
-The central directory is located at the end of the ZIP file. It identifies all
-files contained in the archive by means of a central directory header and is
+The central directory is located at the end of the ZIP file. It identifies each
+file contained in the archive by means of a central directory header and is
 finished by the end of central directory record.
 
 ### Central Directory Header For First File
 
 The metadata in the central directory header is largely, but not completely
-redundant to the corresponding local file header.
-
-This record is specified in [[APPNOTE] section 4.3.12].
+redundant to the corresponding local file header. This record is specified in
+[[APPNOTE] section 4.3.12].
 
  1. The central file header signature.
 
@@ -228,8 +228,10 @@ This record is specified in [[APPNOTE] section 4.3.12].
 
 16. The external file attributes. These are host-system dependent file
     attributes. The host system is determined by field 2, which says Unix, so
-    0x81a4 encodes Unix permissions that read as 100644 in octal notation.
-    [[APPNOTE] section 4.4.15]
+    0x81a4 encodes Unix permissions that read as 100644 in octal notation,
+    meaning "a regular file with permissions rw-r--r--". The two lower bytes are
+    not used in this case. [[APPNOTE] section 4.4.15 and [this
+    post][unix-attributes]]
 
         0000 a481
 
@@ -273,9 +275,8 @@ Same as for the first file.
 
 ### End Of Central Directory Record
 
-The end of central directory record is the entry point of a ZIP archive.
-
-This record is specified in [[APPNOTE] section 4.3.16].
+The end of central directory record is the entry point of a ZIP archive. This
+record is specified in [[APPNOTE] section 4.3.16].
 
  1. The end of central directory signature.
 
@@ -296,13 +297,13 @@ This record is specified in [[APPNOTE] section 4.3.16].
 
         0200
 
- 5. The total number of entries in the central directory. That is the number of
+ 5. The total number of entries in the central directory. This is the number of
     files in this ZIP archive. [[APPNOTE] section 4.4.22]
 
         0200
 
- 6. The size of the central directory. 0x70 = 112 bytes. [[APPNOTE] section
-    4.4.23]
+ 6. The size of the central directory, not counting the end of central directory
+    record itself. 0x70 = 112 bytes. [[APPNOTE] section 4.4.23]
 
         7000 0000
 
@@ -319,3 +320,4 @@ This record is specified in [[APPNOTE] section 4.3.16].
 
 [APPNOTE]: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
 [CRC-32]: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
+[unix-attributes]: https://unix.stackexchange.com/a/14727
