@@ -71,8 +71,8 @@ This will install the `lb` executable to `~/.local/bin/` on Linux and to
 [Pandoc]: https://pandoc.org
 [lb]: https://github.com/marhop/literate-binary
 [releases]: https://github.com/marhop/literate-binary/releases
-[example]: examples/minimal.bmp.md
-[example-wav]: examples/minimal.wav.md
+[example]: examples/bitmap.md
+[example-wav]: examples/wave.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
 [fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
 [Stack]: https://docs.haskellstack.org/

@@ -89,8 +89,8 @@ resulting in a red and a white square next to each other.
 The following two commands convert this Markdown file to PDF and to BMP:
 
 ~~~ {.nobin}
-$ pandoc minimal.bmp.md --output documentation.pdf
-$ lb minimal.bmp.md --output binary.bmp
+$ pandoc bitmap.md --output documentation.pdf
+$ lb bitmap.md --output binary.bmp
 ~~~
 
 Note that the preceding code block will *not* be part of a binary file created
