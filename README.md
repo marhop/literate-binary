@@ -44,8 +44,8 @@ programming](https://en.wikipedia.org/wiki/Literate_programming).
     with the `.nobin` class are ignored as well. This can be used to add code
     other than binary, or to "comment out" a whole code block.
 
-[Here is a complete example][example] describing a simple Bitmap image file; and
-[here is another one][example-wav] describing a WAVE audio file.
+[Here is a complete example][example] describing a simple Bitmap image file;
+there are several others in the [examples/](examples/) directory.
 
 # Usage
 
@@ -53,6 +53,11 @@ Get a binary [here][releases] and put it in your PATH. Then:
 
     $ lb --help
     $ lb source.bmp.md --output binary.bmp
+
+# Contributing
+
+Pull requests for well-documented example files (minimal file format examples,
+misuse of format specifications, ...) are greatly appreciated!
 
 # Building from source
 
