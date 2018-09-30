@@ -1,15 +1,19 @@
 module LiterateBinary.Macro
-    ( expandHexMacros
+    ( bytesFromHexWithMacrosExpanded
     ) where
 
-import Data.Bifunctor (bimap)
+import Data.Bifunctor (first)
+import qualified Data.ByteString as BS
+import Data.ByteString.Base16 (decode)
+import Data.Semigroup (stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import Text.Parsec
 
--- | Expand macros in a hex string.
-expandHexMacros :: T.Text -> Either T.Text T.Text
-expandHexMacros t = bimap (cs . show) eval $ parse hexStrings "" t
+-- | Convert hex string to bit stream, with macros expanded.
+bytesFromHexWithMacrosExpanded :: T.Text -> Either T.Text BS.ByteString
+bytesFromHexWithMacrosExpanded t =
+    first (cs . show) (parse hexStrings "" t) >>= eval
 
 -- | AST data type for hex string parsing.
 data HexString
@@ -17,12 +21,20 @@ data HexString
     | HexMacro [HexString]
                Int
 
--- | Synthesize hex string from AST, with macros expanded.
-eval :: [HexString] -> T.Text
-eval = T.concat . map e
+-- | Synthesize bit stream from AST, with macros expanded.
+eval :: [HexString] -> Either T.Text BS.ByteString
+eval = foldr (\x acc -> BS.append <$> e x <*> acc) (Right BS.empty)
   where
-    e (HexLiteral t) = t
-    e (HexMacro hs n) = T.replicate n $ eval hs
+    e (HexLiteral t) = bytesFromHex t
+    e (HexMacro hs n) = stimes n <$> eval hs
+
+-- | Convert hex string to bit stream.
+bytesFromHex :: T.Text -> Either T.Text BS.ByteString
+bytesFromHex t =
+    let (bytes, err) = decode $ cs t
+    in if BS.null err
+           then Right bytes
+           else Left . cs $ show err
 
 -- | Parse a hex string like "ff((01){4}aa){3}e0".
 hexStrings :: Parsec T.Text () [HexString]
