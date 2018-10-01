@@ -4,7 +4,7 @@ import qualified Data.ByteString as BS
 import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text.IO as TIO
-import LiterateBinary (compile)
+import LiterateBinary (markdownCode, compile)
 import Options.Applicative
 
 main :: IO ()
@@ -37,6 +37,6 @@ getOpts =
 runCompiler :: Options -> IO ()
 runCompiler (Options i o) = do
     text <- maybe TIO.getContents TIO.readFile i
-    case compile text of
+    case markdownCode text >>= compile of
         Left err -> error $ cs err
         Right bin -> maybe (BS.putStr bin) (`BS.writeFile` bin) o
