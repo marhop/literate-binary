@@ -1,10 +1,10 @@
 module Main where
 
-import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
 import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text.IO as TIO
-import LiterateBinary (markdownCode, compile)
+import LiterateBinary (compile, markdownCode)
 import Options.Applicative
 
 main :: IO ()
@@ -39,4 +39,4 @@ runCompiler (Options i o) = do
     text <- maybe TIO.getContents TIO.readFile i
     case markdownCode text >>= compile of
         Left err -> error $ cs err
-        Right bin -> maybe (BS.putStr bin) (`BS.writeFile` bin) o
+        Right bin -> maybe (BL.putStr bin) (`BL.writeFile` bin) o
