@@ -53,6 +53,12 @@ Get a binary [here][releases] and put it in your PATH. Then:
 
     $ lb --help
     $ lb source.bmp.md --output binary.bmp
+    $ echo '(00ff){42} 0a' | lb --plain
+
+Note that no Markdown is involved in the last command, just *plain* hex code.
+Strictly speaking, this defeats the purpose of literate binary, reducing `lb` to
+a beefed-up reverse hex dump tool. Anyway, it's useful for quick tests, so never
+mind.
 
 # Contributing
 
