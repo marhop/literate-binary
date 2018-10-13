@@ -7,6 +7,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import LiterateBinary (compile, markdownCode)
 import Options.Applicative
+import System.IO (hPutStrLn, stderr)
 
 main :: IO ()
 main = getOpts >>= runCompiler
@@ -38,11 +39,11 @@ getOpts =
         switch
             (long "plain" <> short 'p' <> help "Input is just hex, no Markdown")
 
--- | Run LiterateBinary.compile function based on command line options.
+-- | Compile input based on command line options.
 runCompiler :: Options -> IO ()
 runCompiler opts = do
     text <- readInput opts
-    either (error . cs) (writeOutput opts) $
+    either writeError (writeOutput opts) $
         if optPlain opts
             then compile text
             else markdownCode text >>= compile
@@ -54,3 +55,7 @@ readInput = maybe TIO.getContents TIO.readFile . optInput
 -- | Write output to a file or to STDOUT.
 writeOutput :: Options -> BL.ByteString -> IO ()
 writeOutput = maybe BL.putStr BL.writeFile . optOutput
+
+-- | Write text to STDERR.
+writeError :: T.Text -> IO ()
+writeError = hPutStrLn stderr . cs
