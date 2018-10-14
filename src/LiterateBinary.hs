@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module LiterateBinary
     ( markdownCode
     , compile
@@ -11,7 +13,7 @@ import Data.ByteString.Builder
        (Builder, byteString, toLazyByteString)
 import qualified Data.ByteString.Lazy as BL
 import Data.Char (isSpace)
-import Data.Semigroup (stimes)
+import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import qualified Text.Pandoc as P
@@ -80,8 +82,13 @@ eval' = foldr (liftA2 mappend . e) (Right mempty)
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either T.Text BS.ByteString
-bytesFromHex t =
-    let (bytes, err) = decode $ cs t
-    in if BS.null err
-           then Right bytes
-           else Left . cs $ show err
+bytesFromHex t
+    | odd (T.length t) = Left $ label1 <> src
+    | not (BS.null err) = Left $ T.unlines [label2 <> src, mark]
+    | otherwise = Right bytes
+  where
+    (bytes, err) = decode $ cs t
+    label1 = "cannot convert odd number of digits to bytes in hex string "
+    label2 = "invalid digit in hex string "
+    src = "\"" <> t <> "\""
+    mark = stimes (T.length label2 + 1 + (BS.length bytes * 2)) " " <> "^"
