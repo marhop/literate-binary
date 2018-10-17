@@ -19,6 +19,7 @@ import qualified Data.Text as T
 import qualified Text.Pandoc as P
 import Text.Pandoc.Walk (query)
 import Text.Parsec
+import Text.Parsec.Error (errorMessages, showErrorMessages)
 
 -- | Extract content from code blocks in a Markdown document.
 markdownCode :: T.Text -> Either T.Text T.Text
@@ -42,7 +43,30 @@ data HexString
 
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either T.Text [HexString]
-parseHex = first (cs . show) . parse hexStrings "" . removeComments
+parseHex t = first (showParseError t) . parse hexStrings "" $ removeComments t
+
+-- | Show a parser error.
+--
+-- This is a modified version of the default Parsec error message. The source
+-- location (line, column) of the error is omitted because it does not
+-- correspond to the users' Markdown input (but to the pre-processed internal
+-- hex string). The offending hex string is printed instead.
+showParseError :: T.Text -> ParseError -> T.Text
+showParseError t e = T.strip $ T.unlines [parsecMsg, label <> src, mark]
+  where
+    parsecMsg =
+        cs .
+        showErrorMessages
+            "or"
+            "unknown parse error"
+            "expecting"
+            "unexpected"
+            "end of input" $
+        errorMessages e
+    label = "in hex string "
+    i = sourceColumn (errorPos e) - 1
+    src = "\"" <> T.take 10 (T.drop (i - 5) $ removeComments t) <> "\""
+    mark = stimes (T.length label + 1 + min i 5) " " <> "^"
 
 -- | Remove comments (# ...) and whitespace including line breaks.
 removeComments :: T.Text -> T.Text
@@ -84,7 +108,7 @@ eval' = foldr (liftA2 mappend . e) (Right mempty)
 bytesFromHex :: T.Text -> Either T.Text BS.ByteString
 bytesFromHex t
     | odd (T.length t) = Left $ label1 <> src
-    | not (BS.null err) = Left $ T.unlines [label2 <> src, mark]
+    | not (BS.null err) = Left $ T.strip $ T.unlines [label2 <> src, mark]
     | otherwise = Right bytes
   where
     (bytes, err) = decode $ cs t
