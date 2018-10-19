@@ -5,7 +5,7 @@ import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import LiterateBinary (compile, markdownCode)
+import LiterateBinary (Error, compile, markdownCode, showError)
 import Options.Applicative
 import System.IO (hPutStrLn, stderr)
 
@@ -56,6 +56,6 @@ readInput = maybe TIO.getContents TIO.readFile . optInput
 writeOutput :: Options -> BL.ByteString -> IO ()
 writeOutput = maybe BL.putStr BL.writeFile . optOutput
 
--- | Write text to STDERR.
-writeError :: T.Text -> IO ()
-writeError = hPutStrLn stderr . cs
+-- | Write error to STDERR.
+writeError :: Error -> IO ()
+writeError = TIO.hPutStrLn stderr . showError

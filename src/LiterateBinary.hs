@@ -3,6 +3,8 @@
 module LiterateBinary
     ( markdownCode
     , compile
+    , Error
+    , showError
     ) where
 
 import Control.Applicative (liftA2)
@@ -22,9 +24,9 @@ import Text.Parsec
 import Text.Parsec.Error (errorMessages, showErrorMessages)
 
 -- | Extract content from code blocks in a Markdown document.
-markdownCode :: T.Text -> Either T.Text T.Text
+markdownCode :: T.Text -> Either Error T.Text
 markdownCode =
-    bimap (cs . show) (T.unlines . query blocks) . P.readMarkdown P.def . cs
+    bimap MkdParseError (T.unlines . query blocks) . P.readMarkdown P.def . cs
   where
     blocks (P.CodeBlock (_, classes, _) code)
         | "nobin" `elem` classes = []
@@ -32,7 +34,7 @@ markdownCode =
     blocks _ = []
 
 -- | Convert hex string to bit stream, with macros expanded.
-compile :: T.Text -> Either T.Text BL.ByteString
+compile :: T.Text -> Either Error BL.ByteString
 compile t = parseHex t >>= eval
 
 -- | AST data type for hex string parsing.
@@ -42,31 +44,8 @@ data HexString
                Int
 
 -- | Parse hex string including macros, creating an AST.
-parseHex :: T.Text -> Either T.Text [HexString]
-parseHex t = first (showParseError t) . parse hexStrings "" $ removeComments t
-
--- | Show a parser error.
---
--- This is a modified version of the default Parsec error message. The source
--- location (line, column) of the error is omitted because it does not
--- correspond to the users' Markdown input (but to the pre-processed internal
--- hex string). The offending hex string is printed instead.
-showParseError :: T.Text -> ParseError -> T.Text
-showParseError t e = T.strip $ T.unlines [parsecMsg, label <> src, mark]
-  where
-    parsecMsg =
-        cs .
-        showErrorMessages
-            "or"
-            "unknown parse error"
-            "expecting"
-            "unexpected"
-            "end of input" $
-        errorMessages e
-    label = "in hex string "
-    i = sourceColumn (errorPos e) - 1
-    src = "\"" <> T.take 10 (T.drop (i - 5) $ removeComments t) <> "\""
-    mark = stimes (T.length label + 1 + min i 5) " " <> "^"
+parseHex :: T.Text -> Either Error [HexString]
+parseHex t = first (HexParseError t) . parse hexStrings "" $ removeComments t
 
 -- | Remove comments (# ...) and whitespace including line breaks.
 removeComments :: T.Text -> T.Text
@@ -94,25 +73,66 @@ hexMacro =
     (read <$> (char '{' *> many1 digit <* char '}'))
 
 -- | Synthesize bit stream from AST.
-eval :: [HexString] -> Either T.Text BL.ByteString
+eval :: [HexString] -> Either Error BL.ByteString
 eval = fmap toLazyByteString . eval'
 
 -- | Create ByteString builder from AST.
-eval' :: [HexString] -> Either T.Text Builder
+eval' :: [HexString] -> Either Error Builder
 eval' = foldr (liftA2 mappend . e) (Right mempty)
   where
     e (HexLiteral t) = byteString <$> bytesFromHex t
     e (HexMacro hs n) = stimes n <$> eval' hs
 
 -- | Convert hex string to bit stream.
-bytesFromHex :: T.Text -> Either T.Text BS.ByteString
+bytesFromHex :: T.Text -> Either Error BS.ByteString
 bytesFromHex t
-    | odd (T.length t) = Left $ label1 <> src
-    | not (BS.null err) = Left $ T.strip $ T.unlines [label2 <> src, mark]
+    | odd (T.length t) = Left $ OddCharsError t
+    | not (BS.null err) = Left $ ByteConvError t (BS.length bytes * 2)
     | otherwise = Right bytes
   where
     (bytes, err) = decode $ cs t
-    label1 = "cannot convert odd number of digits to bytes in hex string "
-    label2 = "invalid digit in hex string "
-    src = "\"" <> t <> "\""
-    mark = stimes (T.length label2 + 1 + (BS.length bytes * 2)) " " <> "^"
+
+-- | Data type for error messages.
+data Error
+    = MkdParseError { pandocErr :: P.PandocError }
+    | HexParseError { src :: T.Text
+                    , parsecErr :: ParseError }
+    | OddCharsError { src :: T.Text }
+    | ByteConvError { src :: T.Text
+                    , pos :: Int }
+
+-- | Format an error message.
+showError :: Error -> T.Text
+showError (MkdParseError e) = cs $ show e
+showError (HexParseError t e) = label <> src <> mark j <> parsecMsg
+  where
+    label = "invalid syntax in hex string "
+    i = sourceColumn (errorPos e) - 1
+    j = T.length label + 1 + min i 5
+    src = quote $ T.take 10 (T.drop (i - 5) $ removeComments t)
+    parsecMsg =
+        cs .
+        showErrorMessages
+            "or"
+            "unknown parse error"
+            "expecting"
+            "unexpected"
+            "end of input" $
+        errorMessages e
+showError (OddCharsError t) = label <> quote t
+  where
+    label = "odd number of characters in hex string "
+showError (ByteConvError t i) = label <> quote t <> mark j
+  where
+    label = "invalid character in hex string "
+    j = T.length label + 1 + i
+
+-- | Quote a text using double quotes. No escaping!
+quote :: T.Text -> T.Text
+quote t = "\"" <> t <> "\""
+
+-- | Create a text like "\n    ^" that can be used as a mark.
+mark :: Int -> T.Text
+mark i
+    | i < 1 = "\n^"
+    | otherwise = "\n" <> stimes i " " <> "^"
