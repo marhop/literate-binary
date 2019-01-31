@@ -38,13 +38,15 @@ compile :: T.Text -> Either Error BL.ByteString
 compile t = parseHex t >>= eval
 
 -- | AST data type for hex string parsing.
+type HexStrings = [HexString]
+
 data HexString
-    = HexLiteral T.Text
-    | HexMacro [HexString]
-               Int
+    = Literal T.Text
+    | Repetition HexStrings
+                 Int
 
 -- | Parse hex string including macros, creating an AST.
-parseHex :: T.Text -> Either Error [HexString]
+parseHex :: T.Text -> Either Error HexStrings
 parseHex t = first (HexParseError t) . parse hexStrings "" $ removeComments t
 
 -- | Remove comments (# ...) and whitespace including line breaks.
@@ -55,33 +57,33 @@ removeComments = remWhitespace . remComments
     remComments = T.unlines . map (T.takeWhile (/= '#')) . T.lines
 
 -- | Parse a hex string like "ff((01){4}aa){3}e0".
-hexStrings :: Parsec T.Text () [HexString]
+hexStrings :: Parsec T.Text () HexStrings
 hexStrings = many hexString <* eof
 
 -- | Parse a hex string like "ff" or "((01){4}aa){3}".
 hexString :: Parsec T.Text () HexString
-hexString = hexLiteral <|> hexMacro
+hexString = literal <|> repetition
 
 -- | Parse a hex literal like "ff".
-hexLiteral :: Parsec T.Text () HexString
-hexLiteral = HexLiteral . cs <$> many1 hexDigit
+literal :: Parsec T.Text () HexString
+literal = Literal . cs <$> many1 hexDigit
 
--- | Parse a hex macro like "((01){4}aa){3}".
-hexMacro :: Parsec T.Text () HexString
-hexMacro =
-    HexMacro <$> (char '(' *> many hexString <* char ')') <*>
+-- | Parse a repetition hex macro like "((01){4}aa){3}".
+repetition :: Parsec T.Text () HexString
+repetition =
+    Repetition <$> (char '(' *> many hexString <* char ')') <*>
     (read <$> (char '{' *> many1 digit <* char '}'))
 
 -- | Synthesize bit stream from AST.
-eval :: [HexString] -> Either Error BL.ByteString
+eval :: HexStrings -> Either Error BL.ByteString
 eval = fmap toLazyByteString . eval'
 
 -- | Create ByteString builder from AST.
-eval' :: [HexString] -> Either Error Builder
+eval' :: HexStrings -> Either Error Builder
 eval' = foldr (liftA2 mappend . e) (Right mempty)
   where
-    e (HexLiteral t) = byteString <$> bytesFromHex t
-    e (HexMacro hs n) = stimes n <$> eval' hs
+    e (Literal t) = byteString <$> bytesFromHex t
+    e (Repetition hs n) = stimes n <$> eval' hs
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either Error BS.ByteString
