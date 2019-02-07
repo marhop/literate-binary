@@ -44,6 +44,7 @@ data HexString
     = Literal T.Text
     | Repetition HexStrings
                  Int
+    | Alternative [HexStrings]
 
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either Error HexStrings
@@ -56,23 +57,38 @@ removeComments = remWhitespace . remComments
     remWhitespace = T.filter (not . isSpace)
     remComments = T.unlines . map (T.takeWhile (/= '#')) . T.lines
 
--- | Parse a hex string like "ff((01){4}aa){3}e0".
+-- | Parse a hex string like "ff((01){4}aa|2241){3}e0".
 hexStrings :: Parsec T.Text () HexStrings
 hexStrings = many hexString <* eof
 
--- | Parse a hex string like "ff" or "((01){4}aa){3}".
+-- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
-hexString = literal <|> repetition
+hexString = literal <|> parenExpr
 
 -- | Parse a hex literal like "ff".
 literal :: Parsec T.Text () HexString
 literal = Literal . cs <$> many1 hexDigit
 
--- | Parse a repetition hex macro like "((01){4}aa){3}".
-repetition :: Parsec T.Text () HexString
-repetition =
-    Repetition <$> (char '(' *> many hexString <* char ')') <*>
-    (read <$> (char '{' *> many1 digit <* char '}'))
+-- | Parse an expression in parentheses and an optional quantifier: a repetition
+-- like "(ff01){3}" or an alternative like "(aa|ff01)". Both forms may be mixed
+-- and nested.
+parenExpr :: Parsec T.Text () HexString
+parenExpr = mkHexString <$> alternative <*> option 1 quantifier
+  where
+    mkHexString :: [HexStrings] -> Int -> HexString
+    mkHexString [x] n = Repetition x n
+    mkHexString xs 1 = Alternative xs
+    mkHexString xs n = Repetition [Alternative xs] n
+
+-- | Parse a sequence of hex strings in parentheses, separated by "|"
+-- characters. Note that this may also be a one element sequence i.e., a single
+-- hex string in parentheses.
+alternative :: Parsec T.Text () [HexStrings]
+alternative = char '(' *> many1 hexString `sepBy1` char '|' <* char ')'
+
+-- | Parse a quantifier like "{3}".
+quantifier :: Parsec T.Text () Int
+quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
 -- | Synthesize bit stream from AST.
 eval :: HexStrings -> Either Error BL.ByteString
@@ -84,6 +100,8 @@ eval' = foldr (liftA2 mappend . e) (Right mempty)
   where
     e (Literal t) = byteString <$> bytesFromHex t
     e (Repetition hs n) = stimes n <$> eval' hs
+    -- TODO Real implementation with random choice.
+    e (Alternative hs) = eval' $ head hs
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either Error BS.ByteString
