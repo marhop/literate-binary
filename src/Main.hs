@@ -2,12 +2,11 @@ module Main where
 
 import qualified Data.ByteString.Lazy as BL
 import Data.Semigroup ((<>))
-import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import LiterateBinary (Error, compile, markdownCode, showError)
 import Options.Applicative
-import System.IO (hPutStrLn, stderr)
+import System.IO (stderr)
 import System.Random (newStdGen)
 
 main :: IO ()
