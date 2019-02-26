@@ -19,9 +19,11 @@ executable lb
   build-depends:       base >= 4.7 && < 5
                      , base16-bytestring >= 0.1 && < 1
                      , bytestring >= 0.10 && < 1
+                     , containers >= 0.5 && < 1
                      , optparse-applicative >= 0.13 && < 1
                      , pandoc >= 1.19 && < 2
                      , pandoc-types >= 1.17 && < 2
                      , parsec >= 3.1 && < 4
+                     , random >= 1.1 && < 2
                      , string-conversions >= 0.4 && < 1
                      , text >= 1.2 && < 2

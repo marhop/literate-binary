@@ -8,6 +8,7 @@ import qualified Data.Text.IO as TIO
 import LiterateBinary (Error, compile, markdownCode, showError)
 import Options.Applicative
 import System.IO (hPutStrLn, stderr)
+import System.Random (newStdGen)
 
 main :: IO ()
 main = getOpts >>= runCompiler
@@ -43,10 +44,11 @@ getOpts =
 runCompiler :: Options -> IO ()
 runCompiler opts = do
     text <- readInput opts
+    gen <- newStdGen
     either writeError (writeOutput opts) $
         if optPlain opts
-            then compile text
-            else markdownCode text >>= compile
+            then compile gen text
+            else markdownCode text >>= compile gen
 
 -- | Read input from a file or from STDIN.
 readInput :: Options -> IO T.Text

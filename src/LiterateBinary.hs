@@ -18,6 +18,7 @@ import Data.Char (isSpace)
 import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
+import System.Random (RandomGen, randomR)
 import qualified Text.Pandoc as P
 import Text.Pandoc.Walk (query)
 import Text.Parsec
@@ -34,8 +35,8 @@ markdownCode =
     blocks _ = []
 
 -- | Convert hex string to bit stream, with macros expanded.
-compile :: T.Text -> Either Error BL.ByteString
-compile t = parseHex t >>= eval
+compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
+compile g t = parseHex t >>= eval g
 
 -- | AST data type for hex string parsing.
 type HexStrings = [HexString]
@@ -91,17 +92,35 @@ quantifier :: Parsec T.Text () Int
 quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
 -- | Synthesize bit stream from AST.
-eval :: HexStrings -> Either Error BL.ByteString
-eval = fmap toLazyByteString . eval'
+eval :: RandomGen g => g -> HexStrings -> Either Error BL.ByteString
+eval g = fmap toLazyByteString . fst . eval' g
 
 -- | Create ByteString builder from AST.
-eval' :: HexStrings -> Either Error Builder
-eval' = foldr (liftA2 mappend . e) (Right mempty)
+eval' :: RandomGen g => g -> HexStrings -> (Either Error Builder, g)
+eval' g =
+    foldr
+        (\x (acc, g) -> first (\x -> liftA2 mappend x acc) $ e g x)
+        (Right mempty, g)
   where
-    e (Literal t) = byteString <$> bytesFromHex t
-    e (Repetition hs n) = stimes n <$> eval' hs
-    -- TODO Real implementation with random choice.
-    e (Alternative hs) = eval' $ head hs
+    e :: RandomGen g => g -> HexString -> (Either Error Builder, g)
+    e g (Literal t) = (byteString <$> bytesFromHex t, g)
+    -- e g (Repetition x n) = first (stimes n) $ eval' g x
+    e g (Repetition x n) = fromRep g x n
+    e g (Alternative xs) = fromAlt g xs
+
+-- | Create ByteString builder from Repetition.
+fromRep :: RandomGen g => g -> HexStrings -> Int -> (Either Error Builder, g)
+fromRep g = go (Right mempty, g)
+  where
+    go (acc, g) _ 0 = (acc, g)
+    go (acc, g) x n = go (first (liftA2 mappend acc) $ eval' g x) x (n - 1)
+
+-- | Create ByteString builder from Alternative.
+fromAlt :: RandomGen g => g -> [HexStrings] -> (Either Error Builder, g)
+fromAlt g xs = go $ randomL xs g
+  where
+    go (Just x, g) = eval' g x
+    go (Nothing, g) = (Right mempty, g)
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either Error BS.ByteString
@@ -111,6 +130,13 @@ bytesFromHex t
     | otherwise = Right bytes
   where
     (bytes, err) = decode $ cs t
+
+-- | Take a random element from a list.
+randomL :: RandomGen g => [a] -> g -> (Maybe a, g)
+randomL [] g = (Nothing, g)
+randomL xs g =
+    let (i, g') = randomR (0, length xs - 1) g
+    in (Just (xs !! i), g')
 
 -- | Data type for error messages.
 data Error
