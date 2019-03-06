@@ -7,17 +7,17 @@ module LiterateBinary
     , showError
     ) where
 
-import Control.Applicative (liftA2)
 import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy as BL
 import Data.Char (isSpace)
+import Data.Foldable (foldl')
 import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
-import System.Random (RandomGen, randomR)
+import System.Random (RandomGen, StdGen, randomR)
 import qualified Text.Pandoc as P
 import Text.Pandoc.Walk (query)
 import Text.Parsec
@@ -34,7 +34,7 @@ markdownCode =
     blocks _ = []
 
 -- | Convert hex string to bit stream, with macros expanded.
-compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
+compile :: StdGen -> T.Text -> Either Error BL.ByteString
 compile g t = parseHex t >>= eval g
 
 -- | AST data type for hex string parsing.
@@ -90,37 +90,26 @@ alternative = char '(' *> many1 hexString `sepBy1` char '|' <* char ')'
 quantifier :: Parsec T.Text () Int
 quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
+-- | Accumulator data type for hex string AST evaluation.
+data EvalState =
+    EvalState StdGen
+              BSB.Builder
+
 -- | Synthesize bit stream from AST.
-eval :: RandomGen g => g -> HexTree -> Either Error BL.ByteString
-eval g = fmap BSB.toLazyByteString . fst . eval' g
-
--- | Create ByteString builder from AST.
-eval' :: RandomGen g => g -> HexTree -> (Either Error BSB.Builder, g)
-eval' g =
-    foldr
-        (\x (acc, g) -> first (\x -> liftA2 mappend x acc) $ e g x)
-        (Right mempty, g)
+eval :: StdGen -> HexTree -> Either Error BL.ByteString
+eval g t = toByteString <$> eval' t (EvalState g mempty)
   where
-    e :: RandomGen g => g -> HexString -> (Either Error BSB.Builder, g)
-    e g (Literal t) = (BSB.byteString <$> bytesFromHex t, g)
-    -- e g (Repetition x n) = first (stimes n) $ eval' g x
-    e g (Repetition x n) = fromRep g x n
-    e g (Alternative xs) = fromAlt g xs
+    toByteString (EvalState _ b) = BSB.toLazyByteString b
 
--- | Create ByteString builder from Repetition.
-fromRep ::
-       RandomGen g => g -> HexTree -> Int -> (Either Error BSB.Builder, g)
-fromRep g = go (Right mempty, g)
-  where
-    go (acc, g) _ 0 = (acc, g)
-    go (acc, g) x n = go (first (liftA2 mappend acc) $ eval' g x) x (n - 1)
-
--- | Create ByteString builder from Alternative.
-fromAlt :: RandomGen g => g -> [HexTree] -> (Either Error BSB.Builder, g)
-fromAlt g xs = go $ randomL xs g
-  where
-    go (Just x, g) = eval' g x
-    go (Nothing, g) = (Right mempty, g)
+-- | Create ByteString builder (wrapped in EvalState) from AST.
+eval' :: HexTree -> EvalState -> Either Error EvalState
+eval' [Literal x] (EvalState g b) =
+    EvalState g . mappend b . BSB.byteString <$> bytesFromHex x
+eval' [Repetition _ 0] s = Right s
+eval' [Repetition t n] s = eval' (t ++ [Repetition t (n - 1)]) s
+eval' [Alternative ts] s@(EvalState g b) =
+    maybe (Right s) (\(t, g') -> eval' t (EvalState g' b)) $ randomL ts g
+eval' t s = foldl' (\acc x -> acc >>= eval' [x]) (Right s) t
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either Error BS.ByteString
@@ -132,11 +121,9 @@ bytesFromHex t
     (bytes, err) = decode $ cs t
 
 -- | Take a random element from a list.
-randomL :: RandomGen g => [a] -> g -> (Maybe a, g)
-randomL [] g = (Nothing, g)
-randomL xs g =
-    let (i, g') = randomR (0, length xs - 1) g
-    in (Just (xs !! i), g')
+randomL :: RandomGen g => [a] -> g -> Maybe (a, g)
+randomL [] _ = Nothing
+randomL xs g = Just . first (xs !!) $ randomR (0, length xs - 1) g
 
 -- | Data type for error messages.
 data Error
