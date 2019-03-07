@@ -13,7 +13,6 @@ import Data.ByteString.Base16 (decode)
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy as BL
 import Data.Char (isSpace)
-import Data.Foldable (foldl')
 import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
@@ -106,10 +105,11 @@ eval' :: HexTree -> EvalState -> Either Error EvalState
 eval' [Literal x] (EvalState g b) =
     EvalState g . mappend b . BSB.byteString <$> bytesFromHex x
 eval' [Repetition _ 0] s = Right s
-eval' [Repetition t n] s = eval' (t ++ [Repetition t (n - 1)]) s
+eval' [Repetition t n] s = eval' t s >>= eval' [Repetition t (n - 1)]
 eval' [Alternative ts] s@(EvalState g b) =
     maybe (Right s) (\(t, g') -> eval' t (EvalState g' b)) $ randomL ts g
-eval' t s = foldl' (\acc x -> acc >>= eval' [x]) (Right s) t
+eval' [] s = Right s
+eval' (x:xs) s = eval' [x] s >>= eval' xs
 
 -- | Convert hex string to bit stream.
 bytesFromHex :: T.Text -> Either Error BS.ByteString
