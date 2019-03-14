@@ -66,7 +66,17 @@ hexString = literal <|> parenExpr
 
 -- | Parse a hex literal like "ff".
 literal :: Parsec T.Text () HexString
-literal = Literal . cs <$> many1 hexDigit
+literal = Literal . cs <$> many2 hexDigit
+
+-- | Apply a parser an even number of times, at least twice. This is like
+-- @Parsec.many1@, but the parser is not applied one or more, but two or four or
+-- six or ... times.
+many2 :: Stream s m t => ParsecT s u m a -> ParsecT s u m [a]
+many2 p = do
+    x1 <- p
+    x2 <- p
+    xs <- option [] (many2 p)
+    return (x1 : x2 : xs)
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
 -- like "(ff01){3}" or an alternative like "(aa|ff01)". Both forms may be mixed
