@@ -40,7 +40,7 @@ compile g t = parseHex t >>= eval g
 type HexTree = [HexString]
 
 data HexString
-    = Literal T.Text
+    = Literal BS.ByteString
     | Repetition HexTree
                  Int
     | Alternative [HexTree]
@@ -66,7 +66,14 @@ hexString = literal <|> parenExpr
 
 -- | Parse a hex literal like "ff".
 literal :: Parsec T.Text () HexString
-literal = Literal . cs <$> many2 hexDigit
+literal = Literal . bytes <$> many2 hexDigit
+  where
+    bytes :: String -> BS.ByteString
+    bytes s =
+        let (bs, err) = decode (cs s)
+        in if BS.null err
+               then bs
+               else error "This should never happen."
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
@@ -113,7 +120,7 @@ eval g t = toByteString <$> eval' t (EvalState g mempty)
 -- | Create ByteString builder (wrapped in EvalState) from AST.
 eval' :: HexTree -> EvalState -> Either Error EvalState
 eval' [Literal x] (EvalState g b) =
-    EvalState g . mappend b . BSB.byteString <$> bytesFromHex x
+    EvalState g . mappend b . BSB.byteString <$> Right x
 eval' [Repetition _ 0] s = Right s
 eval' [Repetition t n] s = eval' t s >>= eval' [Repetition t (n - 1)]
 eval' [Alternative ts] s@(EvalState g b) =
