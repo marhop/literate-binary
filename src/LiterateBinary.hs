@@ -34,7 +34,7 @@ markdownCode =
 
 -- | Convert hex string to bit stream, with macros expanded.
 compile :: StdGen -> T.Text -> Either Error BL.ByteString
-compile g t = parseHex t >>= eval g
+compile g t = eval g <$> parseHex t
 
 -- | AST data type for hex string parsing.
 type HexTree = [HexString]
@@ -73,7 +73,7 @@ literal = Literal . bytes <$> many2 hexDigit
         let (bs, err) = decode (cs s)
         in if BS.null err
                then bs
-               else error "This should never happen."
+               else error "Unexpected error converting hex to bytes."
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
@@ -112,30 +112,19 @@ data EvalState =
               BSB.Builder
 
 -- | Synthesize bit stream from AST.
-eval :: StdGen -> HexTree -> Either Error BL.ByteString
-eval g t = toByteString <$> eval' t (EvalState g mempty)
+eval :: StdGen -> HexTree -> BL.ByteString
+eval g t = toByteString $ eval' t (EvalState g mempty)
   where
     toByteString (EvalState _ b) = BSB.toLazyByteString b
 
 -- | Create ByteString builder (wrapped in EvalState) from AST.
-eval' :: HexTree -> EvalState -> Either Error EvalState
-eval' [Literal x] (EvalState g b) =
-    EvalState g . mappend b . BSB.byteString <$> Right x
-eval' [Repetition _ 0] s = Right s
-eval' [Repetition t n] s = eval' t s >>= eval' [Repetition t (n - 1)]
+eval' :: HexTree -> EvalState -> EvalState
+eval' [Literal x] (EvalState g b) = EvalState g (b <> BSB.byteString x)
+eval' [Repetition _ 0] s = s
+eval' [Repetition t n] s = eval' [Repetition t (n - 1)] (eval' t s)
 eval' [Alternative ts] s@(EvalState g b) =
-    maybe (Right s) (\(t, g') -> eval' t (EvalState g' b)) $ randomL ts g
-eval' [] s = Right s
-eval' (x:xs) s = eval' [x] s >>= eval' xs
-
--- | Convert hex string to bit stream.
-bytesFromHex :: T.Text -> Either Error BS.ByteString
-bytesFromHex t
-    | odd (T.length t) = Left $ OddCharsError t
-    | not (BS.null err) = Left $ ByteConvError t (BS.length bytes * 2)
-    | otherwise = Right bytes
-  where
-    (bytes, err) = decode $ cs t
+    maybe s (\(t, g') -> eval' t (EvalState g' b)) $ randomL ts g
+eval' xs s = foldl (\s x -> eval' [x] s) s xs
 
 -- | Take a random element from a list.
 randomL :: RandomGen g => [a] -> g -> Maybe (a, g)
@@ -147,9 +136,6 @@ data Error
     = MkdParseError { pandocErr :: P.PandocError }
     | HexParseError { src :: T.Text
                     , parsecErr :: ParseError }
-    | OddCharsError { src :: T.Text }
-    | ByteConvError { src :: T.Text
-                    , pos :: Int }
 
 -- | Format an error message.
 showError :: Error -> T.Text
@@ -169,13 +155,6 @@ showError (HexParseError t e) = label <> src <> mark j <> parsecMsg
             "unexpected"
             "end of input" $
         errorMessages e
-showError (OddCharsError t) = label <> quote t
-  where
-    label = "odd number of characters in hex string "
-showError (ByteConvError t i) = label <> quote t <> mark j
-  where
-    label = "invalid character in hex string "
-    j = T.length label + 1 + i
 
 -- | Quote a text using double quotes. No escaping!
 quote :: T.Text -> T.Text
