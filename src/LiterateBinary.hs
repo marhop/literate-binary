@@ -7,6 +7,7 @@ module LiterateBinary
     , showError
     ) where
 
+import Control.Monad.State (State, evalState, state)
 import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
@@ -19,7 +20,7 @@ import qualified Data.Text as T
 import System.Random (RandomGen, randomR)
 import qualified Text.Pandoc as P
 import Text.Pandoc.Walk (query)
-import Text.Parsec
+import Text.Parsec hiding (State)
 import Text.Parsec.Error (errorMessages, showErrorMessages)
 
 -- | Extract content from code blocks in a Markdown document.
@@ -108,29 +109,31 @@ quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
 -- | Synthesize bit stream from AST.
 eval :: RandomGen g => g -> HexTree -> BL.ByteString
-eval g t = BSB.toLazyByteString . fst $ eval' t g
+eval g t = BSB.toLazyByteString $ evalState (eval' t) g
 
 -- | Create ByteString builder from AST.
-eval' :: RandomGen g => HexTree -> g -> (BSB.Builder, g)
-eval' [Literal x] g = (BSB.byteString x, g)
-eval' [Repetition _ 0] g = (mempty, g)
-eval' [Repetition t n] g =
-    let (b, g') = eval' t g
-        (b', g'') = eval' [Repetition t (n - 1)] g'
-    in (b <> b', g'')
-eval' [Alternative ts] g = maybe (mempty, g) (uncurry eval') $ randomL ts g
-eval' t g =
-    foldl
-        (\(b, g) x ->
-             let (b', g') = eval' [x] g
-             in (b' <> b, g'))
-        (mempty, g)
-        t
+eval' :: RandomGen g => HexTree -> State g BSB.Builder
+eval' [Literal x] = return $ BSB.byteString x
+eval' [Repetition _ 0] = return mempty
+eval' [Repetition t n] = do
+    b1 <- eval' t
+    b2 <- eval' [Repetition t (n - 1)]
+    return (b1 <> b2)
+eval' [Alternative ts] = do
+    t <- randomL ts
+    maybe (return mempty) eval' t
+eval' [] = return mempty
+eval' (x:xs) = do
+    b1 <- eval' [x]
+    b2 <- eval' xs
+    return (b1 <> b2)
 
 -- | Take a random element from a list.
-randomL :: RandomGen g => [a] -> g -> Maybe (a, g)
-randomL [] _ = Nothing
-randomL xs g = Just . first (xs !!) $ randomR (0, length xs - 1) g
+randomL :: RandomGen g => [a] -> State g (Maybe a)
+randomL [] = return Nothing
+randomL xs = do
+    i <- state $ randomR (0, length xs - 1)
+    return $ Just (xs !! i)
 
 -- | Data type for error messages.
 data Error

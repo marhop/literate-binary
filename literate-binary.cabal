@@ -20,6 +20,7 @@ executable lb
                      , base16-bytestring >= 0.1 && < 1
                      , bytestring >= 0.10 && < 1
                      , containers >= 0.5 && < 1
+                     , mtl >= 2.2 && < 3
                      , optparse-applicative >= 0.13 && < 1
                      , pandoc >= 1.19 && < 2
                      , pandoc-types >= 1.17 && < 2
