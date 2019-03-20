@@ -115,25 +115,15 @@ eval g t = BSB.toLazyByteString $ evalState (eval' t) g
 eval' :: RandomGen g => HexTree -> State g BSB.Builder
 eval' [Literal x] = return $ BSB.byteString x
 eval' [Repetition _ 0] = return mempty
-eval' [Repetition t n] = do
-    b1 <- eval' t
-    b2 <- eval' [Repetition t (n - 1)]
-    return (b1 <> b2)
-eval' [Alternative ts] = do
-    t <- randomL ts
-    maybe (return mempty) eval' t
+eval' [Repetition t n] = mappend <$> eval' t <*> eval' [Repetition t (n - 1)]
+eval' [Alternative ts] = randomL ts >>= maybe (return mempty) eval'
 eval' [] = return mempty
-eval' (x:xs) = do
-    b1 <- eval' [x]
-    b2 <- eval' xs
-    return (b1 <> b2)
+eval' (x:xs) = mappend <$> eval' [x] <*> eval' xs
 
 -- | Take a random element from a list.
 randomL :: RandomGen g => [a] -> State g (Maybe a)
 randomL [] = return Nothing
-randomL xs = do
-    i <- state $ randomR (0, length xs - 1)
-    return $ Just (xs !! i)
+randomL xs = Just . (xs !!) <$> state (randomR (0, length xs - 1))
 
 -- | Data type for error messages.
 data Error
