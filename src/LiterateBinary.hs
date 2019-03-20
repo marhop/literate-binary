@@ -16,7 +16,7 @@ import Data.Char (isSpace)
 import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
-import System.Random (RandomGen, StdGen, randomR)
+import System.Random (RandomGen, randomR)
 import qualified Text.Pandoc as P
 import Text.Pandoc.Walk (query)
 import Text.Parsec
@@ -33,7 +33,7 @@ markdownCode =
     blocks _ = []
 
 -- | Convert hex string to bit stream, with macros expanded.
-compile :: StdGen -> T.Text -> Either Error BL.ByteString
+compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
 compile g t = eval g <$> parseHex t
 
 -- | AST data type for hex string parsing.
@@ -106,25 +106,26 @@ alternative = char '(' *> many1 hexString `sepBy1` char '|' <* char ')'
 quantifier :: Parsec T.Text () Int
 quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
--- | Accumulator data type for hex string AST evaluation.
-data EvalState =
-    EvalState StdGen
-              BSB.Builder
-
 -- | Synthesize bit stream from AST.
-eval :: StdGen -> HexTree -> BL.ByteString
-eval g t = toByteString $ eval' t (EvalState g mempty)
-  where
-    toByteString (EvalState _ b) = BSB.toLazyByteString b
+eval :: RandomGen g => g -> HexTree -> BL.ByteString
+eval g t = BSB.toLazyByteString . fst $ eval' t g
 
--- | Create ByteString builder (wrapped in EvalState) from AST.
-eval' :: HexTree -> EvalState -> EvalState
-eval' [Literal x] (EvalState g b) = EvalState g (b <> BSB.byteString x)
-eval' [Repetition _ 0] s = s
-eval' [Repetition t n] s = eval' [Repetition t (n - 1)] (eval' t s)
-eval' [Alternative ts] s@(EvalState g b) =
-    maybe s (\(t, g') -> eval' t (EvalState g' b)) $ randomL ts g
-eval' xs s = foldl (\s x -> eval' [x] s) s xs
+-- | Create ByteString builder from AST.
+eval' :: RandomGen g => HexTree -> g -> (BSB.Builder, g)
+eval' [Literal x] g = (BSB.byteString x, g)
+eval' [Repetition _ 0] g = (mempty, g)
+eval' [Repetition t n] g =
+    let (b, g') = eval' t g
+        (b', g'') = eval' [Repetition t (n - 1)] g'
+    in (b <> b', g'')
+eval' [Alternative ts] g = maybe (mempty, g) (uncurry eval') $ randomL ts g
+eval' t g =
+    foldl
+        (\(b, g) x ->
+             let (b', g') = eval' [x] g
+             in (b' <> b, g'))
+        (mempty, g)
+        t
 
 -- | Take a random element from a list.
 randomL :: RandomGen g => [a] -> g -> Maybe (a, g)
