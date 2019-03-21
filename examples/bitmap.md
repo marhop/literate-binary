@@ -68,21 +68,26 @@ padding, usually NULL bytes, to achieve a four byte alignment for each line of
 pixels. (That means the number of bytes that encode one line of pixels should be
 divisible by four -- if it's not, NULL bytes are appended until it is.)
 
-    (
-    (0000ff){113} # 113 red pixels
-    (ffffff){113} # 113 white pixels
-    0000          # padding
-    ){113}        # 113 lines of red and white pixels
+    # 113 lines of 113 red + 113 green pixels + padding
+    ((0000ff){113} (00ff00){113} 0000){113}
 
-    # the same but with blue and green pixels
-    ( (ff0000){113} (00ff00){113} 0000 ){113}
+    # 113 lines of 113 blue + 113 black or white or yellow pixels + padding
+    ((ff0000){113} (000000|ffffff|00ffff){113} 0000){113}
 
 These two code blocks will also be part of a binary file created by [`lb`][lb].
-Note the use of hex macros: Where `0000ff` denotes three bytes that encode a
-single red pixel, `(0000ff){113}` denotes a sequence of 339 bytes (or 113
-repetitions of this three bytes sequence) that encode 113 red pixels. Macros may
-be nested, making it easy to create 113 lines of 113 red and 113 white pixels,
-resulting in a red and a white square next to each other.
+Note the use of several hex macros in these code blocks:
+
+  * First, a repetition macro. Where `0000ff` denotes three bytes that encode a
+    single red pixel, `(0000ff){113}` denotes a sequence of 339 bytes (or 113
+    repetitions of this three bytes sequence) that encode 113 red pixels. Macros
+    may be nested, making it easy e.g. to create 113 lines of 113 red and 113
+    green pixels each, resulting in a red and a green square next to each other.
+  * Then, an alternative macro. Where `000000` denotes three bytes that encode a
+    black pixel and `ffffff` denotes three bytes that encode a white pixel,
+    `(000000|ffffff|00ffff)` denotes a random choice of one of the three given
+    options i.e., either a black pixel or a white pixel or a yellow pixel.
+    Naturally, "random" means that this macro will result in a different byte
+    each time it is processed by `lb`.
 
 # Usage Example
 
