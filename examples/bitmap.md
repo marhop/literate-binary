@@ -18,7 +18,7 @@ Numeric values are encoded in little endian byte order.
 
  1. The first header starts with the magic number `424d` (ASCII "BM") that helps
     to identify the file type, followed by the total size of the file in bytes,
-    eight bytes reserved for application specific use, and finally the offset of
+    four bytes reserved for application specific use, and finally the offset of
     the actual image data in the file.
 
         424d     # magic number
