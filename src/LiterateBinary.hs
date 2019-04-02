@@ -26,11 +26,13 @@ import Text.Parsec.Error (errorMessages, showErrorMessages)
 -- | Extract content from code blocks in a Markdown document.
 markdownCode :: T.Text -> Either Error T.Text
 markdownCode =
-    bimap MkdParseError (T.unlines . query blocks) . P.readMarkdown P.def . cs
+    bimap MkdParseError (T.unlines . query blocks) .
+    P.runPure . P.readMarkdown P.def
   where
+    blocks :: P.Block -> [T.Text]
     blocks (P.CodeBlock (_, classes, _) code)
         | "nobin" `elem` classes = []
-        | otherwise = [cs code :: T.Text]
+        | otherwise = [cs code]
     blocks _ = []
 
 -- | Convert hex string to bit stream, with macros expanded.
