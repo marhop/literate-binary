@@ -117,7 +117,9 @@ eval g t = BSB.toLazyByteString $ evalState (eval' t) g
 eval' :: RandomGen g => HexTree -> State g BSB.Builder
 eval' [Literal x] = return $ BSB.byteString x
 eval' [Repetition _ 0] = return mempty
-eval' [Repetition t n] = mappend <$> eval' t <*> eval' [Repetition t (n - 1)]
+eval' [Repetition t n]
+    | any isRandom t = mappend <$> eval' t <*> eval' [Repetition t (n - 1)]
+    | otherwise = stimes n <$> eval' t
 eval' [Alternative ts] = randomL ts >>= maybe (return mempty) eval'
 eval' [] = return mempty
 eval' (x:xs) = mappend <$> eval' [x] <*> eval' xs
@@ -126,6 +128,12 @@ eval' (x:xs) = mappend <$> eval' [x] <*> eval' xs
 randomL :: RandomGen g => [a] -> State g (Maybe a)
 randomL [] = return Nothing
 randomL xs = Just . (xs !!) <$> state (randomR (0, length xs - 1))
+
+-- | Check if a HexString contains (possibly nested) random parts.
+isRandom :: HexString -> Bool
+isRandom (Literal _) = False
+isRandom (Repetition t _) = any isRandom t
+isRandom (Alternative _) = True
 
 -- | Data type for error messages.
 data Error
