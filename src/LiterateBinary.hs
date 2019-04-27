@@ -47,10 +47,13 @@ data HexString
     | Repetition HexTree
                  Int
     | Alternative [HexTree]
+    | Range HexTree
+            HexTree
+    deriving (Show)
 
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either Error HexTree
-parseHex t = first (HexParseError t) . parse hexTree "" $ removeComments t
+parseHex t = first (HexParseError t) . parse hexFile "" $ removeComments t
 
 -- | Remove comments (# ...) and whitespace including line breaks.
 removeComments :: T.Text -> T.Text
@@ -59,9 +62,14 @@ removeComments = remWhitespace . remComments
     remWhitespace = T.filter (not . isSpace)
     remComments = T.unlines . map (T.takeWhile (/= '#')) . T.lines
 
+-- | Parse a (possibly empty) hex string like "ff((01){4}aa|2241){3}e0",
+-- terminated by EOF.
+hexFile :: Parsec T.Text () HexTree
+hexFile = option [] hexTree <* eof
+
 -- | Parse a hex string like "ff((01){4}aa|2241){3}e0".
 hexTree :: Parsec T.Text () HexTree
-hexTree = many hexString <* eof
+hexTree = many1 hexString
 
 -- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
@@ -89,21 +97,37 @@ many2 p = do
     return (x1 : x2 : xs)
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
--- like "(ff01){3}" or an alternative like "(aa|ff01)". Both forms may be mixed
--- and nested.
+-- like "(ff01){3}", an alternative like "(aa|ff01)" or a range like "(00-ff)".
+-- All forms may be mixed and nested.
 parenExpr :: Parsec T.Text () HexString
-parenExpr = mkHexString <$> alternative <*> option 1 quantifier
+parenExpr =
+    combine <$> (char '(' *> innerParenExpr <* char ')') <*> option 1 quantifier
   where
-    mkHexString :: [HexTree] -> Int -> HexString
-    mkHexString [x] n = Repetition x n
-    mkHexString xs 1 = Alternative xs
-    mkHexString xs n = Repetition [Alternative xs] n
+    combine :: HexTree -> Int -> HexString
+    combine [x] 1 = x
+    combine t n = Repetition t n
 
--- | Parse a sequence of hex strings in parentheses, separated by "|"
--- characters. Note that this may also be a one element sequence i.e., a single
--- hex string in parentheses.
-alternative :: Parsec T.Text () [HexTree]
-alternative = char '(' *> many1 hexString `sepBy1` char '|' <* char ')'
+-- | Parse the content of a paren expression: a hex string like "aa",
+-- optionally followed by a tail like "|bb" or "-cc", denoting an alternative or
+-- a range respectively.
+innerParenExpr :: Parsec T.Text () HexTree
+innerParenExpr =
+    combine <$> hexTree <*> optionMaybe (alternativeTail <|> rangeTail)
+  where
+    combine :: HexTree -> Maybe HexString -> HexTree
+    combine t Nothing = t
+    combine t (Just (Alternative ts)) = [Alternative (t : ts)]
+    combine t (Just (Range _ t')) = [Range t t']
+    combine _ _ = error "Unexpected error parsing paren expression."
+
+-- | Parse the "tail" of an alternative like "|ff01" or "|ff01|aa".
+alternativeTail :: Parsec T.Text () HexString
+alternativeTail = Alternative <$> (char '|' *> hexTree `sepBy1` char '|')
+
+-- | Parse the "tail" of a range like "-ff". Returns a 'Range' with the first
+-- component set to a dummy value, an empty HexTree.
+rangeTail :: Parsec T.Text () HexString
+rangeTail = Range [] <$> (char '-' *> hexTree)
 
 -- | Parse a quantifier like "{3}".
 quantifier :: Parsec T.Text () Int
