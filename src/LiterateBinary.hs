@@ -73,7 +73,7 @@ hexTree = many1 hexString
 
 -- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
-hexString = literal <|> parenExpr
+hexString = literal <|> parenExpr <|> dot
 
 -- | Parse a hex literal like "ff".
 literal :: Parsec T.Text () HexString
@@ -100,12 +100,7 @@ many2 p = do
 -- like "(ff01){3}", an alternative like "(aa|ff01)" or a range like "(00-ff)".
 -- All forms may be mixed and nested.
 parenExpr :: Parsec T.Text () HexString
-parenExpr =
-    combine <$> (char '(' *> innerParenExpr <* char ')') <*> option 1 quantifier
-  where
-    combine :: HexTree -> Int -> HexString
-    combine [x] 1 = x
-    combine t n = Repetition t n
+parenExpr = quantified (char '(' *> innerParenExpr <* char ')')
 
 -- | Parse the content of a paren expression: a hex string like "aa",
 -- optionally followed by a tail like "|bb" or "-cc", denoting an alternative or
@@ -129,9 +124,20 @@ alternativeTail = Alternative <$> (char '|' *> hexTree `sepBy1` char '|')
 rangeTail :: Parsec T.Text () HexString
 rangeTail = Range [] <$> (char '-' *> hexTree)
 
--- | Parse a quantifier like "{3}".
-quantifier :: Parsec T.Text () Int
-quantifier = read <$> (char '{' *> many1 digit <* char '}')
+-- | Parse a single dot and an optional quantifer like "." or ".{3}". This is an
+-- alias for the range expression "(00-ff)" which denotes one random byte.
+dot :: Parsec T.Text () HexString
+dot = quantified ([Range [Literal "\NUL"] [Literal "\255"]] <$ char '.')
+
+-- | Combine a parser with an optional trailing quantifier like "{3}".
+quantified :: Parsec T.Text u HexTree -> Parsec T.Text u HexString
+quantified p = combine <$> p <*> option 1 quantifier
+  where
+    combine :: HexTree -> Int -> HexString
+    combine [x] 1 = x
+    combine t n = Repetition t n
+    quantifier :: Parsec T.Text u Int
+    quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
 -- | Synthesize bit stream from AST.
 eval :: RandomGen g => g -> HexTree -> BL.ByteString
