@@ -4,10 +4,10 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Semigroup ((<>))
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import LiterateBinary (Error, compile, markdownCode, showError)
 import Options.Applicative
 import System.IO (stderr)
-import System.Random (newStdGen)
+
+import LiterateBinary (Error, compileIO, compilePlainIO, showError)
 
 main :: IO ()
 main = getOpts >>= runCompiler
@@ -41,13 +41,12 @@ getOpts =
 
 -- | Compile input based on command line options.
 runCompiler :: Options -> IO ()
-runCompiler opts = do
-    text <- readInput opts
-    gen <- newStdGen
-    either writeError (writeOutput opts) $
-        if optPlain opts
-            then compile gen text
-            else markdownCode text >>= compile gen
+runCompiler opts =
+    readInput opts >>=
+    (if optPlain opts
+         then compilePlainIO
+         else compileIO) >>=
+    either writeError (writeOutput opts)
 
 -- | Read input from a file or from STDIN.
 readInput :: Options -> IO T.Text
