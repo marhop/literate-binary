@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- |
+-- Module     : LiterateBinary.Parse
+-- Copyright  : (c) Martin Hoppenheit 2019
+-- License    : MIT
+-- Maintainer : martin@hoppenheit.info
+--
+-- Parser functions for "LiterateBinary".
+
 module LiterateBinary.Parse
     ( parseMarkdown
     , parseHex
@@ -121,13 +129,13 @@ quantified p = combine <$> p <*> option 1 quantifier
     quantifier :: Parsec T.Text u Int
     quantifier = read <$> (char '{' *> many1 digit <* char '}')
 
--- | Data type for error messages.
+-- | Data type for parser error messages.
 data Error
     = MkdParseError { pandocErr :: P.PandocError }
     | HexParseError { src :: T.Text
                     , parsecErr :: ParseError }
 
--- | Format an error message.
+-- | Format a parser error message.
 showError :: Error -> T.Text
 showError (MkdParseError e) = cs $ show e
 showError (HexParseError t e) = label <> src <> mark j <> parsecMsg

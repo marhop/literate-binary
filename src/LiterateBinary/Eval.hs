@@ -1,3 +1,12 @@
+-- |
+-- Module     : LiterateBinary.Eval
+-- Copyright  : (c) Martin Hoppenheit 2019
+-- License    : MIT
+-- Maintainer : martin@hoppenheit.info
+--
+-- Evaluation function for "LiterateBinary" that turns a 'HexTree' AST into a
+-- 'ByteString'.
+
 module LiterateBinary.Eval
     ( eval
     ) where

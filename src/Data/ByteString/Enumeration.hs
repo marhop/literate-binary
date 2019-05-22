@@ -1,3 +1,24 @@
+-- |
+-- Module     : Data.ByteString.Enumeration
+-- Copyright  : (c) Martin Hoppenheit 2019
+-- License    : MIT
+-- Maintainer : martin@hoppenheit.info
+--
+-- Enumeration for 'ByteString' values. The function application @range x y@
+-- enumerates all ByteStrings from x to y, ordered by length (and
+-- lexicographically for ByteStrings with equal length). Note that this is not
+-- an 'Enum' instance and that the enumeration order is not compatible with the
+-- existing 'Ord' instance for ByteString.
+--
+-- > range 00 ff = [00, 01, ..., fe, ff]
+-- > range ff 00 = []
+-- > range mempty 0100 = [mempty, 00, 01, ..., ff, 0000, 0001, ..., 00ff, 0100]
+--
+-- The last example illustrates why the enumeration is not compatible with the
+-- Ord instance for ByteString: The enumeration contains the sequence @[..., ff,
+-- 0000, ...]@, but @ff > 0000@. See also <https://stackoverflow.com/a/10356655>
+-- for a similar example.
+
 module Data.ByteString.Enumeration
     ( range
     ) where
@@ -5,12 +26,6 @@ module Data.ByteString.Enumeration
 import qualified Data.ByteString as BS
 
 -- | Create a range of ByteStrings based on start and end values.
---
--- > range x y == [x, succBS x, succBS (succBS x), ..., y]
---
--- Note that the order of elements in the resulting range is generally not
--- compatible with the Ord instance for ByteStrings but with the order implied
--- by the 'lteq' and 'succBS' functions.
 range :: BS.ByteString -> BS.ByteString -> [BS.ByteString]
 range x y = takeWhile (`lteq` y) $ iterate succBS x
 
@@ -19,12 +34,12 @@ range x y = takeWhile (`lteq` y) $ iterate succBS x
 -- successor of an empty ByteString by definition is the NULL byte. In
 -- particular, this affects carry operations. Examples:
 --
--- > succBS 0x00 == 0x01
--- > succBS 0x0000 == 0x0001
--- > succBS 0x0100 == 0x0101
--- > succBS 0x00ff == 0x0100
--- > succBS mempty == 0x00
--- > succBS 0xff == 0x0000 /= 0x0100
+-- > succBS 00 == 01
+-- > succBS 0000 == 0001
+-- > succBS 0100 == 0101
+-- > succBS 00ff == 0100
+-- > succBS mempty == 00
+-- > succBS ff == 0000 /= 0100
 succBS :: BS.ByteString -> BS.ByteString
 succBS =
     maybe
