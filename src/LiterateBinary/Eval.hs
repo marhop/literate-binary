@@ -18,7 +18,7 @@ import Data.Semigroup (stimes)
 import Data.String.Conversions (cs)
 import System.Random (RandomGen, randomR)
 
-import Data.ByteString.Enumeration (range)
+import Data.ByteString.Enumeration (randomInRange)
 import LiterateBinary.HexTree (HexString(..), HexTree)
 
 -- | Synthesize bit stream from AST.
@@ -36,7 +36,7 @@ eval' [Alternative ts] = randomL ts >>= maybe (return mempty) eval'
 eval' [Range t1 t2] = do
     b1 <- cs . toLazyByteString <$> eval' t1
     b2 <- cs . toLazyByteString <$> eval' t2
-    maybe mempty byteString <$> randomL (range b1 b2)
+    byteString <$> state (randomInRange (b1, b2))
 eval' [] = return mempty
 eval' (x:xs) = mappend <$> eval' [x] <*> eval' xs
 
