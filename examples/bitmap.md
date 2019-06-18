@@ -27,7 +27,7 @@ Numeric values are encoded in little endian byte order.
         36000000 # offset of image data
 
     Note that the preceding code block will be part of a binary file created by
-    [`lb`][lb]. Whitespace including linebreaks and comments will be ignored.
+    `lb`. Whitespace including linebreaks and comments will be ignored.
 
  2. Information about the image encoded in this file, such as dimensions and
     color information, can be found in the second header.
@@ -44,13 +44,13 @@ Numeric values are encoded in little endian byte order.
         00000000 # number of colors in palette
         00000000 # important colors (0 = all)
 
-    This code block will also be part of a binary file created by [`lb`][lb].
+    This code block will also be part of a binary file created by `lb`.
 
 Explaining the meaning of all fields in the second header is beyond the scope of
 this example because it is not meant to be an introduction to the BMP format but
-merely to show how a literate binary file could look like. Some hints, however:
+merely to show how a literate binary file looks like. Some hints, however:
 
-  * Width and height are given in pixels, so this is a 226x226 pixels image
+  * Width and height are given in pixels, so this is a 226 * 226 pixels image
     (0xe2 = 226).
   * Most of the color stuff is either always the same (like number of color
     planes) or irrelevant in the present case (like number of colors in the
@@ -68,26 +68,40 @@ padding, usually NULL bytes, to achieve a four byte alignment for each line of
 pixels. (That means the number of bytes that encode one line of pixels should be
 divisible by four -- if it's not, NULL bytes are appended until it is.)
 
-    # 113 lines of 113 red + 113 green pixels + padding
-    ((0000ff){113} (00ff00){113} 0000){113}
+Encoding a 226 * 226 pixels image in this way requires 226 lines of 226 pixels.
+Each line is represented by 226 * 3 + 2 = 680 bytes (two bytes padding because
+226 * 3 = 678 is not divisible by four), adding up to a total of 226 * 680 =
+153680 bytes. Both writing and reading such a large amount of bytes as plain hex
+values would be rather inconvenient. Luckily though, literate binary supports a
+macro syntax that facilitates the compact description of repetitive or random
+byte patterns. Examples of this macro syntax can be seen at work in the
+following code blocks.
 
-    # 113 lines of 113 blue + 113 black or white or yellow pixels + padding
-    ((ff0000){113} (000000|ffffff|00ffff){113} 0000){113}
+    # one red square + one square of random black/grey/white pixels
+    ((0000ff){113} (000000|808080|ffffff){113} 0000){113}
 
-These two code blocks will also be part of a binary file created by [`lb`][lb].
-Note the use of several hex macros in these code blocks:
+    # one square of shades of green + one square of randomly colored pixels
+    ((00(80-ff)00){113} (...){113} 0000){113}
 
-  * First, a repetition macro. Where `0000ff` denotes three bytes that encode a
-    single red pixel, `(0000ff){113}` denotes a sequence of 339 bytes (or 113
-    repetitions of this three bytes sequence) that encode 113 red pixels. Macros
-    may be nested, making it easy e.g. to create 113 lines of 113 red and 113
-    green pixels each, resulting in a red and a green square next to each other.
-  * Then, an alternative macro. Where `000000` denotes three bytes that encode a
-    black pixel and `ffffff` denotes three bytes that encode a white pixel,
-    `(000000|ffffff|00ffff)` denotes a random choice of one of the three given
-    options i.e., either a black pixel or a white pixel or a yellow pixel.
-    Naturally, "random" means that this macro will result in a different byte
-    each time it is processed by `lb`.
+These two code blocks will also be part of a binary file created by `lb`, and
+special care will be taken of any hex macros during the conversion:
+
+  * The repetition macro `(0000ff){113}` denotes 113 repetitions of the byte
+    sequence `0000ff`, resulting in 113 red pixels. Macros may be nested, making
+    it easy e.g. to create 113 lines of 113 red and 113 green pixels each,
+    resulting in a red and a green square next to each other.
+  * The alternative macro `(000000|808080|ffffff)` denotes a random choice of
+    one of the given options, resulting in either a black or a grey or a white
+    pixel. Naturally, "random" means that this macro will produce a different
+    pixel each time it is processed by `lb`, so combining this with a repetition
+    macro like in `(000000|808080|ffffff){113}` will result in 113 random black
+    or grey or white pixels.
+  * The range macro `(80-ff)` behaves like the alternative `(80|81|...|fe|ff)`,
+    so the expression `00(80-ff)00` results in a pixel colored in a random shade
+    of green.
+  * The special range macro `.` (a single dot) is an abbreviation for the range
+    `(00-ff)` which denotes one random byte, so the expression `...` results in
+    a randomly colored pixel.
 
 # Usage Example
 
@@ -99,6 +113,6 @@ $ lb bitmap.md --output binary.bmp
 ~~~
 
 Note that the preceding code block will *not* be part of a binary file created
-by [`lb`][lb]. It will be ignored because of the `.nobin` class.
+by `lb`. It will be ignored because of the `.nobin` class.
 
 [lb]: https://github.com/marhop/literate-binary
