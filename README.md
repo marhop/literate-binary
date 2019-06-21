@@ -26,23 +26,39 @@ content.
 Obviously, this is inspired by [Donald Knuth's ideas on literate
 programming](https://en.wikipedia.org/wiki/Literate_programming).
 
-# Conventions
+# Syntax
 
-  * The [`lb` (literate binary) tool][lb] expects a [Markdown] file as input.
-  * All [code blocks] in this file tied together form the content of the binary
-    file created by `lb`. All other content including inline code in backticks
-    `` `like this` `` is ignored, only code blocks are relevant.
-  * The code blocks must contain nothing but hex characters (upper or lower
-    case), macros, whitespace and comments.
-  * Macros are used to write long, repetitive hex patterns in a compact way.
-    They consist of a sequence of hex characters and a quantifier, similar to
-    regular expression syntax. For example, the macro `(ff00){3}` expands to
-    `ff00ff00ff00`. Macros may be nested, like
-    `(ff(00e2){2}00((21){4}03){12}){8}`.
-  * Comments start with a `#` sign and end at the end of the line.
-  * There is one exception to the "all code blocks" rule; [fenced code blocks]
-    with the `.nobin` class are ignored as well. This can be used to add code
-    other than binary, or to "comment out" a whole code block.
+The [`lb` (literate binary) tool][lb] produces a binary file from a [Markdown]
+input file. The binary is made up by all [code blocks] in the input file tied
+together. All other content including inline code in backticks `` `like this` ``
+is ignored. The code blocks must contain nothing but hex strings, whitespace and
+comments. The set of valid hex strings is defined as follows:
+
+Each sequence of hex characters (0-9, A-F, upper or lower case) with equal
+length like `00ff` is a valid hex string; each pair of characters in this
+sequence translates to one byte in the usual fashion. Given hex strings x and y
+and a positive integer n, the following macros are valid hex strings as well:
+
+  * A *repetition* of the form `(x){n}`. This translates to the byte sequence
+    corresponding to x, repeated n times. Example: `(00ff){3}` → `00ff00ff00ff`
+  * An *alternative* of the form `(x|...|y)`. This translates to the byte
+    sequence corresponding to either x or ... or y, selected randomly. Example:
+    `(00|ff|3333)` → one of `00`, `ff` or `3333`
+  * A *range* of the form `(x-y)`. This translates to one random byte sequence
+    from the range defined by x and y. Example: `(0c-0f)` → one of `0c`, `0d`,
+    `0e` or `0f`
+  * The special range `.` (a single dot). This translates to one random byte, so
+    it is equivalent to the range `(00-ff)`.
+
+When combining an alternative or range with a repetition, redundant parentheses
+are not required: `(x|y){n}` is equivalent to `((x|y)){n}`, `(x-y){n}` is
+equivalent to `((x-y)){n}`, and `.{n}` is equivalent to `(.){n}`.
+
+Comments start with a `#` sign and end at the end of the line.
+
+It is possible to exclude single code blocks from processing; [fenced code
+blocks] with the `.nobin` class are ignored by `lb`. This can be used to add
+code other than binary, or to "comment out" a whole code block.
 
 [Here is a complete example][example] describing a simple Bitmap image file;
 there are several others in the [examples/](examples/) directory.
@@ -62,8 +78,8 @@ mind.
 
 # Contributing
 
-Pull requests for well-documented example files (minimal file format examples,
-misuse of format specifications, ...) are greatly appreciated!
+Pull requests, particularly well-documented example files (minimal file format
+examples, misuse of format specifications, ...) are greatly appreciated!
 
 # Building from source
 
@@ -83,7 +99,6 @@ This will install the `lb` executable to `~/.local/bin/` on Linux and to
 [lb]: https://github.com/marhop/literate-binary
 [releases]: https://github.com/marhop/literate-binary/releases
 [example]: examples/bitmap.md
-[example-wav]: examples/wave.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
 [fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
 [Stack]: https://docs.haskellstack.org/
