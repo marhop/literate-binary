@@ -1,5 +1,5 @@
 name:                literate-binary
-version:             1.1.0
+version:             1.2.0
 synopsis:            Integrate handcrafted binary and documentation
 homepage:            https://github.com/marhop/literate-binary
 license:             MIT

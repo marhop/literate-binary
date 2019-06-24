@@ -25,7 +25,7 @@ getOpts =
     execParser $ info (helper <*> version <*> options) (fullDesc <> header hdr)
   where
     hdr = "lb - literate binary compiler"
-    version = infoOption "1.1.0" (long "version" <> help "Show version number")
+    version = infoOption "1.2.0" (long "version" <> help "Show version number")
     options = Options <$> input <*> output <*> plain
     input =
         optional $
