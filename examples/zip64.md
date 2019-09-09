@@ -174,7 +174,7 @@ section 4.3.14].
 ## ZIP64 End Of Central Directory Locator
 
 The ZIP64 end of central directory locator is used to locate the ZIP64 end of
-central directory record which. This record is specified in [[APPNOTE] section
+central directory record. This record is specified in [[APPNOTE] section
 4.3.15].
 
  1. The ZIP64 end of central directory locator signature.
