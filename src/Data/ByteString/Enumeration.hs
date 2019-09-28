@@ -11,7 +11,6 @@
 -- existing 'Ord' instance for ByteString.
 --
 -- > range 00 ff = [00, 01, ..., fe, ff]
--- > range ff 00 = []
 -- > range mempty 0100 = [mempty, 00, 01, ..., ff, 0000, 0001, ..., 00ff, 0100]
 --
 -- The last example illustrates why the enumeration is not compatible with the
@@ -32,7 +31,7 @@ import System.Random (RandomGen, randomR)
 range :: BS.ByteString -> BS.ByteString -> [BS.ByteString]
 range x y
     | x `gt` y = range y x
-    | otherwise = takeWhile (not . (`gt` y)) $ iterate (nthSucc 1) x
+    | otherwise = takeWhile (not . (`gt` y)) $ iterate succ' x
 
 -- | Create one random ByteString in a range based on start and end values. This
 -- function is more efficient than creating a (potentially large) list with
@@ -48,27 +47,21 @@ randomInRange (x, y)
 -- exception that the successor of an empty ByteString by definition is the NULL
 -- byte. In particular, this affects carry operations. Examples:
 --
--- > nthSucc 0 00 == 00
--- > nthSucc 1 00 == 01
--- > nthSucc 8 00 == 08
--- > nthSucc 1 0000 == 0001
--- > nthSucc 1 0100 == 0101
--- > nthSucc 1 00ff == 0100
--- > nthSucc 1 mempty == 00
--- > nthSucc 1 ff == 0000 /= 0100
-nthSucc :: Integer -> BS.ByteString -> BS.ByteString
-nthSucc 0 x = x
-nthSucc 1 x =
+-- > succ' 00 == 01
+-- > succ' 0000 == 0001
+-- > succ' 0100 == 0101
+-- > succ' 00ff == 0100
+-- > succ' mempty == 00
+-- > succ' ff == 0000 /= 0100
+succ' :: BS.ByteString -> BS.ByteString
+succ' =
     maybe
         (BS.singleton 0x00)
-        (\(ys, y) ->
-             if y < 0xff
-                 then BS.snoc ys (succ y)
-                 else BS.snoc (nthSucc 1 ys) 0x00) $
-    BS.unsnoc x
-nthSucc n x
-    | n > 1 = nthSucc (n - 1) (nthSucc 1 x)
-    | otherwise = mempty
+        (\(xs, x) ->
+             if x < 0xff
+                 then BS.snoc xs (succ x)
+                 else BS.snoc (succ' xs) 0x00) .
+    BS.unsnoc
 
 -- | Modified "greater than" comparison for ByteStrings that takes the length of
 -- a ByteString into account. Given two ByteStrings x and y, @x `gt` y@ iff
