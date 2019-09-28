@@ -41,7 +41,7 @@ randomInRange ::
        RandomGen g => (BS.ByteString, BS.ByteString) -> g -> (BS.ByteString, g)
 randomInRange (x, y)
     | x `gt` y = randomInRange (y, x)
-    | otherwise = first (`nthSucc` x) . randomR (0, rangeLength x y - 1)
+    | otherwise = first toEnum' . randomR (fromEnum' x, fromEnum' y)
 
 -- | Successor function for ByteStrings. Behaves mostly like a chain of succ
 -- applications for a ByteString interpreted as a number would do, with the
@@ -79,15 +79,26 @@ nthSucc n x
 gt :: BS.ByteString -> BS.ByteString -> Bool
 gt x y = (compare (BS.length x) (BS.length y) <> compare x y) == GT
 
--- | Calculate the length of a range of ByteStrings based on start and end
--- values.
-rangeLength :: BS.ByteString -> BS.ByteString -> Integer
-rangeLength x y
-    | x `gt` y = 0
-    | otherwise =
-        num y - num x + 1 +
-        sum [256 ^ k | k <- [BS.length x .. BS.length y - 1]]
+-- | Like the regular 'fromEnum' function but Integer typed. The mapping from
+-- ByteString to Integer is a little uncommon because it takes the empty
+-- ByteString and leading NULL bytes into account:
+--
+-- > fromEnum' mempty == 0
+-- > fromEnum' 00 == 1
+-- > fromEnum' ff == 256
+-- > fromEnum' 0000 == 257
+-- > fromEnum' 00ff == 512
+-- > fromEnum' 0100 == 513
+fromEnum' :: BS.ByteString -> Integer
+fromEnum' = BS.foldl' (\acc x -> 256 * acc + fromIntegral x + 1) 0
 
--- | Calculate the numeric value of a ByteString.
-num :: BS.ByteString -> Integer
-num = BS.foldl' (\acc x -> 256 * acc + fromIntegral x) 0
+-- | Like the regular 'toEnum' function but Integer typed. This is the inverse
+-- of fromEnum'.
+toEnum' :: Integer -> BS.ByteString
+toEnum' 0 = mempty
+toEnum' x
+    | x < 0 = error "Unexpected error converting Integer to ByteString."
+    | m == 0 = BS.snoc (toEnum' (d - 1)) 255
+    | otherwise = BS.snoc (toEnum' d) (fromIntegral m - 1)
+  where
+    (d, m) = x `divMod` 256
