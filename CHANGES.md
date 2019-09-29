@@ -1,3 +1,9 @@
+# Release 1.2.1
+
+2019-09-29
+
+  * Performance improvements for range macros.
+
 # Release 1.2.0
 
 2019-06-24
