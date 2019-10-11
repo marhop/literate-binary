@@ -18,6 +18,7 @@ module LiterateBinary.Parse
 import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
+import Data.ByteString.UTF8 (fromString)
 import Data.Char (isSpace)
 import Data.Semigroup ((<>), stimes)
 import Data.String.Conversions (cs)
@@ -63,11 +64,11 @@ hexTree = many1 hexString
 
 -- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
-hexString = literal <|> parenExpr <|> dot
+hexString = hexLiteral <|> strLiteral <|> parenExpr <|> dot
 
 -- | Parse a hex literal like "ff".
-literal :: Parsec T.Text () HexString
-literal = Literal . bytes <$> many2 hexDigit
+hexLiteral :: Parsec T.Text () HexString
+hexLiteral = Literal . bytes <$> many2 hexDigit
   where
     bytes :: String -> BS.ByteString
     bytes s =
@@ -85,6 +86,14 @@ many2 p = do
     x2 <- p
     xs <- option [] (many2 p)
     return (x1 : x2 : xs)
+
+-- | Parse a quoted string literal like "\"ASCII string\"" that will become a
+-- UTF-8 encoded ByteString.
+-- TODO Don't remove whitespace globally before parsing.
+-- TODO Allow quantified string macros.
+strLiteral :: Parsec T.Text () HexString
+strLiteral =
+    Literal . fromString <$> (char '"' *> many (noneOf ['"']) <* char '"')
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
 -- like "(ff01){3}", an alternative like "(aa|ff01)" or a range like "(00-ff)".

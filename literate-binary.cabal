@@ -32,3 +32,4 @@ executable lb
                      , random
                      , string-conversions
                      , text
+                     , utf8-string
