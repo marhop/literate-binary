@@ -87,13 +87,14 @@ many2 p = do
     xs <- option [] (many2 p)
     return (x1 : x2 : xs)
 
--- | Parse a quoted string literal like "\"ASCII string\"" that will become a
--- UTF-8 encoded ByteString.
+-- | Parse a quoted string literal like "\"ASCII string\"" (which will become a
+-- UTF-8 encoded ByteString) and an optional quantifier.
 -- TODO Don't remove whitespace globally before parsing.
--- TODO Allow quantified string macros.
 strLiteral :: Parsec T.Text () HexString
 strLiteral =
-    Literal . fromString <$> (char '"' *> many (noneOf ['"']) <* char '"')
+    quantified $
+    pure . Literal . fromString <$>
+    (char '"' *> many (noneOf ['"']) <* char '"')
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
 -- like "(ff01){3}", an alternative like "(aa|ff01)" or a range like "(00-ff)".
