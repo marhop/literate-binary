@@ -44,7 +44,7 @@ parseMarkdown =
 
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either Error HexTree
-parseHex t = first (HexParseError t) . parse hexFile "" $ removeComments t
+parseHex t = first (HexParseError t) $ parse hexFile "" t
 
 -- | Remove comments (# ...) and whitespace including line breaks.
 removeComments :: T.Text -> T.Text
@@ -60,7 +60,7 @@ hexFile = option [] hexTree <* eof
 
 -- | Parse a hex string like "ff((01){4}aa|2241){3}e0".
 hexTree :: Parsec T.Text () HexTree
-hexTree = many1 hexString
+hexTree = spaces *> many1 (hexString <* spaces)
 
 -- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
@@ -73,9 +73,9 @@ hexLiteral = Literal . bytes <$> many2 hexDigit
     bytes :: String -> BS.ByteString
     bytes s =
         let (bs, err) = decode (cs s)
-        in if BS.null err
-               then bs
-               else error "Unexpected error converting hex to bytes."
+         in if BS.null err
+                then bs
+                else error "Unexpected error converting hex to bytes."
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
@@ -89,7 +89,6 @@ many2 p = do
 
 -- | Parse a quoted string literal like "\"ASCII string\"" (which will become a
 -- UTF-8 encoded ByteString) and an optional quantifier.
--- TODO Don't remove whitespace globally before parsing.
 strLiteral :: Parsec T.Text () HexString
 strLiteral =
     quantified $
@@ -131,13 +130,14 @@ dot = quantified ([Range [Literal "\NUL"] [Literal "\255"]] <$ char '.')
 
 -- | Combine a parser with an optional trailing quantifier like "{3}".
 quantified :: Parsec T.Text u HexTree -> Parsec T.Text u HexString
-quantified p = combine <$> p <*> option 1 quantifier
+quantified p = combine <$> p <* spaces <*> option 1 quantifier
   where
     combine :: HexTree -> Int -> HexString
     combine [x] 1 = x
     combine t n = Repetition t n
     quantifier :: Parsec T.Text u Int
-    quantifier = read <$> (char '{' *> many1 digit <* char '}')
+    quantifier =
+        read <$> (char '{' *> spaces *> many1 digit <* spaces <* char '}')
 
 -- | Data type for parser error messages.
 data Error
