@@ -68,7 +68,7 @@ hexString = hexLiteral <|> strLiteral <|> parenExpr <|> dot
 
 -- | Parse a hex literal like "ff".
 hexLiteral :: Parsec T.Text () HexString
-hexLiteral = Literal . bytes <$> many2 hexDigit
+hexLiteral = Literal . bytes <$> many2 (hexDigit <* spaces)
   where
     bytes :: String -> BS.ByteString
     bytes s =
@@ -137,7 +137,7 @@ quantified p = combine <$> p <* spaces <*> option 1 quantifier
     combine t n = Repetition t n
     quantifier :: Parsec T.Text u Int
     quantifier =
-        read <$> (char '{' *> spaces *> many1 digit <* spaces <* char '}')
+        read <$> (char '{' *> spaces *> many1 (digit <* spaces) <* char '}')
 
 -- | Data type for parser error messages.
 data Error
