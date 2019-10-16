@@ -60,7 +60,13 @@ hexFile = option [] hexTree <* eof
 
 -- | Parse a hex string like "ff((01){4}aa|2241){3}e0".
 hexTree :: Parsec T.Text () HexTree
-hexTree = spaces *> many1 (hexString <* spaces)
+hexTree = ignorable *> many1 (hexString <* ignorable)
+
+-- | Skip a (possibly empty) sequence of whitespace and comments (# ...).
+ignorable :: Parsec T.Text u ()
+ignorable = skipMany (space <|> comment)
+  where
+    comment = char '#' *> many (noneOf "\r\n") *> endOfLine
 
 -- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
 hexString :: Parsec T.Text () HexString
@@ -68,7 +74,7 @@ hexString = hexLiteral <|> strLiteral <|> parenExpr <|> dot
 
 -- | Parse a hex literal like "ff".
 hexLiteral :: Parsec T.Text () HexString
-hexLiteral = Literal . bytes <$> many2 (hexDigit <* spaces)
+hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
   where
     bytes :: String -> BS.ByteString
     bytes s =
@@ -130,14 +136,15 @@ dot = quantified ([Range [Literal "\NUL"] [Literal "\255"]] <$ char '.')
 
 -- | Combine a parser with an optional trailing quantifier like "{3}".
 quantified :: Parsec T.Text u HexTree -> Parsec T.Text u HexString
-quantified p = combine <$> p <* spaces <*> option 1 quantifier
+quantified p = combine <$> p <* ignorable <*> option 1 quantifier
   where
     combine :: HexTree -> Int -> HexString
     combine [x] 1 = x
     combine t n = Repetition t n
     quantifier :: Parsec T.Text u Int
     quantifier =
-        read <$> (char '{' *> spaces *> many1 (digit <* spaces) <* char '}')
+        read <$>
+        (char '{' *> ignorable *> many1 (digit <* ignorable) <* char '}')
 
 -- | Data type for parser error messages.
 data Error
