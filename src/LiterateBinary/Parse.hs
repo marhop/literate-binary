@@ -19,8 +19,7 @@ import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
 import Data.ByteString.UTF8 (fromString)
-import Data.Char (isSpace)
-import Data.Semigroup ((<>), stimes)
+import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import qualified Text.Pandoc as P
@@ -45,13 +44,6 @@ parseMarkdown =
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either Error HexTree
 parseHex t = first (HexParseError t) $ parse hexFile "" t
-
--- | Remove comments (# ...) and whitespace including line breaks.
-removeComments :: T.Text -> T.Text
-removeComments = remWhitespace . remComments
-  where
-    remWhitespace = T.filter (not . isSpace)
-    remComments = T.unlines . map (T.takeWhile (/= '#')) . T.lines
 
 -- | Parse a (possibly empty) hex string like "ff((01){4}aa|2241){3}e0",
 -- terminated by EOF.
@@ -155,12 +147,10 @@ data Error
 -- | Format a parser error message.
 showError :: Error -> T.Text
 showError (MkdParseError e) = cs $ show e
-showError (HexParseError t e) = label <> src <> mark j <> parsecMsg
+showError (HexParseError t e) = label <> src <> parsecMsg
   where
     label = "invalid syntax in hex string "
-    i = sourceColumn (errorPos e) - 1
-    j = T.length label + 1 + min i 5
-    src = quote $ T.take 10 (T.drop (i - 5) $ removeComments t)
+    src = quote $ T.lines t !! (sourceLine (errorPos e) - 1)
     parsecMsg =
         cs .
         showErrorMessages
@@ -171,12 +161,6 @@ showError (HexParseError t e) = label <> src <> mark j <> parsecMsg
             "end of input" $
         errorMessages e
 
--- | Quote a text using double quotes. No escaping!
+-- | Quote a text using single quotes. No escaping!
 quote :: T.Text -> T.Text
-quote t = "\"" <> t <> "\""
-
--- | Create a text like "\n    ^" that can be used as a mark.
-mark :: Int -> T.Text
-mark i
-    | i < 1 = "\n^"
-    | otherwise = "\n" <> stimes i " " <> "^"
+quote t = "'" <> t <> "'"
