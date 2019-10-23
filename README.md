@@ -49,10 +49,15 @@ and a positive integer n, the following macros are valid hex strings as well:
     `0e` or `0f`
   * The special range `.` (a single dot). This translates to one random byte, so
     it is equivalent to the range `(00-ff)`.
+  * A *string* of the form `"..."` with arbitrary text content inside the
+    quotes. This translates to the UTF-8 encoded byte sequence corresponding to
+    the quoted string content. (Note that ASCII is a subset of UTF-8.) Example:
+    `"foo bar"` → `666f6f20626172`
 
-When combining an alternative or range with a repetition, redundant parentheses
-are not required: `(x|y){n}` is equivalent to `((x|y)){n}`, `(x-y){n}` is
-equivalent to `((x-y)){n}`, and `.{n}` is equivalent to `(.){n}`.
+When combining an alternative, a range or a string with a repetition, redundant
+parentheses are not required: `(x|y){n}` is equivalent to `((x|y)){n}`,
+`(x-y){n}` is equivalent to `((x-y)){n}`, `.{n}` is equivalent to `(.){n}`, and
+`"foo"{3}` is equivalent to `("foo"){3}`.
 
 Comments start with a `#` sign and end at the end of the line.
 

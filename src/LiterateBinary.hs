@@ -41,11 +41,14 @@
 --     range is defined according to the rules in 'Data.ByteString.Enumeration'.
 --   * The special range @.@ (a single dot). This translates to one random byte,
 --     so it is equivalent to the range @(00-ff)@.
+--   * A /string/ of the form @"..."@ with arbitrary text content inside the
+--     quotes. This translates to the UTF-8 encoded ByteString corresponding to
+--     the quoted string content. (Note that ASCII is a subset of UTF-8.)
 --
--- When combining an alternative or range with a repetition, redundant
--- parentheses are not required: @(x|y){n}@ is equivalent to @((x|y)){n}@,
--- @(x-y){n}@ is equivalent to @((x-y)){n}@, and @.{n}@ is equivalent to
--- @(.){n}@.
+-- When combining an alternative, a range or a string with a repetition,
+-- redundant parentheses are not required: @(x|y){n}@ is equivalent to
+-- @((x|y)){n}@, @(x-y){n}@ is equivalent to @((x-y)){n}@, @.{n}@ is equivalent
+-- to @(.){n}@, and @"foo"{3}@ is equivalent to @("foo"){3}@.
 --
 -- Whitespace including line breaks as well as comments (@# ...@ until end of
 -- line) are ignored in a hex string.
