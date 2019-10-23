@@ -32,27 +32,27 @@ not fit into 32 bits: "If an archive is in ZIP64 format and the value in this
 field is 0xFFFFFFFF, the size will be in the corresponding 8 byte ZIP64 extended
 information extra field." [[APPNOTE] sections 4.4.8 and 4.4.9]
 
-    504b 0304              # local file header signature
-    2d00                   # version needed to extract
-    0000                   # general purpose bit flag
-    0000                   # compresion method
-    4eb7                   # last mod file time
-    294d                   # last mod file date
-    2d3b 08af              # crc-32
-    ffff ffff              # compressed size - too big for 32 bits
-    ffff ffff              # uncompressed size - too big for 32 bits
-    0900                   # file name length
-    1400                   # extra field length
-    6865 6c6c 6f2e 7478 74 # file name "hello.txt"
+    504b 0304   # local file header signature
+    2d00        # version needed to extract
+    0000        # general purpose bit flag
+    0000        # compresion method
+    4eb7        # last mod file time
+    294d        # last mod file date
+    2d3b 08af   # crc-32
+    ffff ffff   # compressed size - too big for 32 bits
+    ffff ffff   # uncompressed size - too big for 32 bits
+    0900        # file name length
+    1400        # extra field length
+    "hello.txt" # file name
 
 The ZIP64 extended information extra field contains the compressed and
 uncompressed sizes as 64 bit numbers. It should be created if one of these
 values does not fit into 32 bits. [[APPNOTE] section 4.5.3]
 
-    0100                   # header ID "ZIP64 extended information extra field"
-    1000                   # data size
-    0c00 0000 0000 0000    # uncompressed size
-    0c00 0000 0000 0000    # compressed size
+    0100                # header ID "ZIP64 extended information extra field"
+    1000                # data size
+    0c00 0000 0000 0000 # uncompressed size
+    0c00 0000 0000 0000 # compressed size
 
 Obviously, a real world ZIP file would not need the ZIP64 extensions used in
 this example because none of the size values actually requires 64 bits and so
@@ -65,7 +65,7 @@ This is just the same as in a regular ZIP file. In this example, the file data
 consists of the uncompressed ASCII string "hello world", followed by a line
 feed.
 
-    6865 6c6c 6f20 776f 726c 640a
+    "hello world" 0a
 
 In a real world ZIP64 file there would of course be much more data (more than 4
 GB, to be precise) and it would most likely be compressed. Compression would
@@ -79,24 +79,24 @@ Basically the same as a central directory header in a regular ZIP file. As in
 the local file header, some fields need special attention because of the ZIP64
 extension.
 
-    504b 0102              # central file header signature
-    1e03                   # version made by
-    2d00                   # version needed to extract
-    0000                   # general purpose bit flag
-    0000                   # compression method
-    4eb7                   # last mod file time
-    294d                   # last mod file date
-    2d3b 08af              # crc-32
-    ffff ffff              # compressed size - too big for 32 bits
-    ffff ffff              # uncompressed size - too big for 32 bits
-    0900                   # file name length
-    2000                   # extra field length
-    0000                   # file comment length
-    ffff                   # disk number start - too big for 32 bits
-    0100                   # internal file attributes
-    0000 a481              # external file attributes
-    ffff ffff              # offset of local header - too big for 32 bits
-    6865 6c6c 6f2e 7478 74 # file name "hello.txt"
+    504b 0102   # central file header signature
+    1e03        # version made by
+    2d00        # version needed to extract
+    0000        # general purpose bit flag
+    0000        # compression method
+    4eb7        # last mod file time
+    294d        # last mod file date
+    2d3b 08af   # crc-32
+    ffff ffff   # compressed size - too big for 32 bits
+    ffff ffff   # uncompressed size - too big for 32 bits
+    0900        # file name length
+    2000        # extra field length
+    0000        # file comment length
+    ffff        # disk number start - too big for 32 bits
+    0100        # internal file attributes
+    0000 a481   # external file attributes
+    ffff ffff   # offset of local header - too big for 32 bits
+    "hello.txt" # file name
 
 As in the local file header, there is a ZIP64 extended information extra field.
 In addition to the compressed size and uncompressed size values the extra field
@@ -106,12 +106,12 @@ local file header. Just like the size values none of those actually needs this
 extension, so there is no reason to include them in the extra field -- except to
 serve as an example.
 
-    0100                   # header ID "ZIP64 extended information extra field"
-    1c00                   # data size
-    0c00 0000 0000 0000    # uncompressed size
-    0c00 0000 0000 0000    # compressed size
-    0000 0000 0000 0000    # offset of local header
-    0000 0000              # disk number start
+    0100                # header ID "ZIP64 extended information extra field"
+    1c00                # data size
+    0c00 0000 0000 0000 # uncompressed size
+    0c00 0000 0000 0000 # compressed size
+    0000 0000 0000 0000 # offset of local header
+    0000 0000           # disk number start
 
 ## ZIP64 End Of Central Directory Record
 

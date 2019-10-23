@@ -32,25 +32,25 @@ purpose bit flag is set (`0800`, little endian) to indicate the presence of a
 data descriptor. Second, the crc-32, compressed size and uncompressed size
 fields are set to zero. [[APPNOTE] section 4.4.4]
 
-    504b 0304              # local file header signature
-    0a00                   # version needed to extract
-    0800                   # general purpose bit flag
-    0000                   # compression method
-    70bd                   # last mod file time
-    2c4f                   # last mod file date
-    0000 0000              # crc-32
-    0000 0000              # compressed size
-    0000 0000              # uncompressed size
-    0900                   # file name length
-    0000                   # extra field length
-    6865 6c6c 6f2e 7478 74 # file name "hello.txt"
+    504b 0304   # local file header signature
+    0a00        # version needed to extract
+    0800        # general purpose bit flag
+    0000        # compression method
+    70bd        # last mod file time
+    2c4f        # last mod file date
+    0000 0000   # crc-32
+    0000 0000   # compressed size
+    0000 0000   # uncompressed size
+    0900        # file name length
+    0000        # extra field length
+    "hello.txt" # file name
 
 ## File Data
 
 The same as in a regular ZIP file. In this example, the file data consists of
 the uncompressed ASCII string "hello world", followed by a line feed.
 
-    6865 6c6c 6f20 776f 726c 640a 
+    "hello world" 0a
 
 ## Data Descriptor
 
@@ -72,24 +72,24 @@ descriptor. Apart from that this section does not differ from a regular ZIP
 file. In particular, the size and checksum values can be found in their usual
 places.
 
-    504b 0102              # central file header signature
-    1e03                   # version made by
-    0a00                   # version needed to extract
-    0800                   # general purpose bit flag
-    0000                   # compression method
-    70bd                   # last mod file time
-    2c4f                   # last mod file date
-    2d3b 08af              # crc-32
-    0c00 0000              # compressed size
-    0c00 0000              # uncompressed size
-    0900                   # file name length
-    0000                   # extra field length
-    0000                   # file comment length
-    0000                   # disk number start
-    0100                   # internal file attributes
-    0000 a481              # external file attributes
-    0000 0000              # offset of local header
-    6865 6c6c 6f2e 7478 74 # file name "hello.txt"
+    504b 0102   # central file header signature
+    1e03        # version made by
+    0a00        # version needed to extract
+    0800        # general purpose bit flag
+    0000        # compression method
+    70bd        # last mod file time
+    2c4f        # last mod file date
+    2d3b 08af   # crc-32
+    0c00 0000   # compressed size
+    0c00 0000   # uncompressed size
+    0900        # file name length
+    0000        # extra field length
+    0000        # file comment length
+    0000        # disk number start
+    0100        # internal file attributes
+    0000 a481   # external file attributes
+    0000 0000   # offset of local header
+    "hello.txt" # file name
 
 ## End Of Central Directory Record
 

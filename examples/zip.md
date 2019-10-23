@@ -92,9 +92,9 @@ This record is specified in [[APPNOTE] section 4.3.7].
 
         0000
 
-12. The file name. "hello.txt" [[APPNOTE] section 4.4.17]
+12. The file name. [[APPNOTE] section 4.4.17]
 
-        6865 6c6c 6f2e 7478 74
+        "hello.txt"
 
 13. The extra field. This can be used to store a series of extensible data
     fields for different use cases like ZIP64 extended information or
@@ -112,7 +112,7 @@ Different compression methods may be used for different files. In this example,
 the file data consists of the uncompressed ASCII string "hello world", followed
 by a line feed.
 
-    6865 6c6c 6f20 776f 726c 640a 
+    "hello world" 0a
 
 This record is specified in [[APPNOTE] section 4.3.8].
 
@@ -125,25 +125,25 @@ necessary only in very special cases.
 
 The local file header for the second file is very similar to the first.
 
-    504b 0304                   # local file header signature
-    0a00                        # version needed to extract
-    0000                        # general purpose bit flag
-    0000                        # compression method
-    4eb7                        # last mod file time
-    294d                        # last mod file date
-    0db3 bd19                   # crc-32
-    0e00 0000                   # compressed size
-    0e00 0000                   # uncompressed size
-    0b00                        # file name length
-    0000                        # extra field length
-    676f 6f64 6279 652e 7478 74 # file name "goodbye.txt"
+    504b 0304     # local file header signature
+    0a00          # version needed to extract
+    0000          # general purpose bit flag
+    0000          # compression method
+    4eb7          # last mod file time
+    294d          # last mod file date
+    0db3 bd19     # crc-32
+    0e00 0000     # compressed size
+    0e00 0000     # uncompressed size
+    0b00          # file name length
+    0000          # extra field length
+    "goodbye.txt" # file name
 
 ### File Data
 
 The file data consists of the ASCII string "goodbye world", followed by a line
 feed.
 
-    676f 6f64 6279 6520 776f 726c 640a
+    "goodbye world" 0a
 
 ## Central Directory
 
@@ -244,7 +244,7 @@ redundant to the corresponding local file header. This record is specified in
 
 18. The file name.
 
-        6865 6c6c 6f2e 7478 74
+        "hello.txt"
 
 19. The extra field. None in this example.
 
@@ -254,24 +254,24 @@ redundant to the corresponding local file header. This record is specified in
 
 Same as for the first file.
 
-    504b 0102                   # central file header signature
-    1e03                        # version made by
-    0a00                        # version needed to extract
-    0000                        # general purpose bit flag
-    0000                        # compression method
-    4eb7                        # last mod file time
-    294d                        # last mod file date
-    0db3 bd19                   # crc-32
-    0e00 0000                   # compressed size
-    0e00 0000                   # uncompressed size
-    0b00                        # file name length
-    0000                        # extra field length
-    0000                        # file comment start
-    0000                        # disk number start
-    0100                        # internal file attributes
-    0000 a481                   # external file attributes
-    3300 0000                   # offset of local header
-    676f 6f64 6279 652e 7478 74 # file name "goodbye.txt"
+    504b 0102     # central file header signature
+    1e03          # version made by
+    0a00          # version needed to extract
+    0000          # general purpose bit flag
+    0000          # compression method
+    4eb7          # last mod file time
+    294d          # last mod file date
+    0db3 bd19     # crc-32
+    0e00 0000     # compressed size
+    0e00 0000     # uncompressed size
+    0b00          # file name length
+    0000          # extra field length
+    0000          # file comment start
+    0000          # disk number start
+    0100          # internal file attributes
+    0000 a481     # external file attributes
+    3300 0000     # offset of local header
+    "goodbye.txt" # file name
 
 ### End Of Central Directory Record
 
