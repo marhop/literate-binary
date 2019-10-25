@@ -86,15 +86,26 @@ many2 p = do
     return (x1 : x2 : xs)
 
 -- | Parse a quoted string literal like @"ASCII string"@ or @'ASCII string'@ and
--- an optional quantifier. Both single and double quotes are allowed. The string
--- will become a UTF-8 encoded ByteString wrapped in a 'Literal'.
+-- an optional quantifier. Both single and double quotes are allowed. The quote
+-- sign itself may appear inside the string escaped by a backslash like @\"@, a
+-- literal backslash has to be escaped by another backslash like @\\@. The
+-- string will become a UTF-8 encoded ByteString wrapped in a 'Literal'.
 strLiteral :: Parsec T.Text () HexString
 strLiteral = quantified (pure <$> (quoted '"' <|> quoted '\''))
 
--- | Parse a string surrounded by a given quote char and turn it into a UTF-8
--- encoded ByteString wrapped in a 'Literal'.
+-- | Parse a string surrounded by a given quote sign and turn it into a UTF-8
+-- encoded ByteString wrapped in a 'Literal'. The quote sign itself may appear
+-- inside the string escaped by a backslash, a literal backslash has to be
+-- escaped by another backslash.
 quoted :: Char -> Parsec T.Text () HexString
-quoted q = Literal . fromString <$> (char q *> many (noneOf [q]) <* char q)
+quoted q =
+    Literal . fromString <$>
+    (char q *> many (escape q <|> noneOf [q]) <* char q)
+
+-- | Parse a given character preceded (i.e., escaped) by a backslash, or a
+-- double backslash (i.e., an escaped backslash).
+escape :: Char -> Parsec T.Text () Char
+escape c = char '\\' *> (char c <|> char '\\')
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
 -- like @(ff01){3}@, an alternative like @(aa|ff01)@ or a range like @(00-ff)@.

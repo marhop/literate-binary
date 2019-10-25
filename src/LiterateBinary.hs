@@ -42,9 +42,10 @@
 --   * The special range @.@ (a single dot). This translates to one random byte,
 --     so it is equivalent to the range @(00-ff)@.
 --   * A /string/ of the form @"..."@ or @'...'@ with arbitrary text content
---     inside the quotes (except for the quote signs themselves). This
---     translates to the UTF-8 encoded ByteString corresponding to the quoted
---     string content. (Note that ASCII is a subset of UTF-8.)
+--     inside the quotes. The quote sign itself may appear inside the string
+--     escaped by a backslash, a literal backslash has to be escaped by another
+--     backslash. This translates to the UTF-8 encoded ByteString corresponding
+--     to the quoted string content. (Note that ASCII is a subset of UTF-8.)
 --
 -- When combining an alternative, a range or a string with a repetition,
 -- redundant parentheses are not required: @(x|y){n}@ is equivalent to
