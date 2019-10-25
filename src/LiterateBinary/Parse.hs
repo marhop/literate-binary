@@ -45,26 +45,26 @@ parseMarkdown =
 parseHex :: T.Text -> Either Error HexTree
 parseHex t = first (HexParseError t) $ parse hexFile "" t
 
--- | Parse a (possibly empty) hex string like "ff((01){4}aa|2241){3}e0",
+-- | Parse a (possibly empty) hex string like @ff((01){4}aa|2241){3}e0@,
 -- terminated by EOF.
 hexFile :: Parsec T.Text () HexTree
 hexFile = option [] hexTree <* eof
 
--- | Parse a hex string like "ff((01){4}aa|2241){3}e0".
+-- | Parse a hex string like @ff((01){4}aa|2241){3}e0@.
 hexTree :: Parsec T.Text () HexTree
 hexTree = ignorable *> many1 (hexString <* ignorable)
 
--- | Skip a (possibly empty) sequence of whitespace and comments (# ...).
+-- | Skip a (possibly empty) sequence of whitespace and comments (@# ...@).
 ignorable :: Parsec T.Text u ()
 ignorable = skipMany (space <|> comment)
   where
     comment = char '#' *> many (noneOf "\r\n") *> endOfLine
 
--- | Parse a hex string like "ff" or "((01){4}aa|2241){3}".
+-- | Parse a hex string like @ff@ or @((01){4}aa|2241){3}@.
 hexString :: Parsec T.Text () HexString
 hexString = hexLiteral <|> strLiteral <|> parenExpr <|> dot
 
--- | Parse a hex literal like "ff".
+-- | Parse a hex literal like @ff@.
 hexLiteral :: Parsec T.Text () HexString
 hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
   where
@@ -85,22 +85,25 @@ many2 p = do
     xs <- option [] (many2 p)
     return (x1 : x2 : xs)
 
--- | Parse a quoted string literal like "\"ASCII string\"" (which will become a
--- UTF-8 encoded ByteString) and an optional quantifier.
+-- | Parse a quoted string literal like @"ASCII string"@ or @'ASCII string'@ and
+-- an optional quantifier. Both single and double quotes are allowed. The string
+-- will become a UTF-8 encoded ByteString wrapped in a 'Literal'.
 strLiteral :: Parsec T.Text () HexString
-strLiteral =
-    quantified $
-    pure . Literal . fromString <$>
-    (char '"' *> many (noneOf ['"']) <* char '"')
+strLiteral = quantified (pure <$> (quoted '"' <|> quoted '\''))
+
+-- | Parse a string surrounded by a given quote char and turn it into a UTF-8
+-- encoded ByteString wrapped in a 'Literal'.
+quoted :: Char -> Parsec T.Text () HexString
+quoted q = Literal . fromString <$> (char q *> many (noneOf [q]) <* char q)
 
 -- | Parse an expression in parentheses and an optional quantifier: a repetition
--- like "(ff01){3}", an alternative like "(aa|ff01)" or a range like "(00-ff)".
+-- like @(ff01){3}@, an alternative like @(aa|ff01)@ or a range like @(00-ff)@.
 -- All forms may be mixed and nested.
 parenExpr :: Parsec T.Text () HexString
 parenExpr = quantified (char '(' *> innerParenExpr <* char ')')
 
--- | Parse the content of a paren expression: a hex string like "aa",
--- optionally followed by a tail like "|bb" or "-cc", denoting an alternative or
+-- | Parse the content of a paren expression: a hex string like @aa@,
+-- optionally followed by a tail like @|bb@ or @-cc@, denoting an alternative or
 -- a range respectively.
 innerParenExpr :: Parsec T.Text () HexTree
 innerParenExpr =
@@ -112,21 +115,21 @@ innerParenExpr =
     combine t (Just (Range _ t')) = [Range t t']
     combine _ _ = error "Unexpected error parsing paren expression."
 
--- | Parse the "tail" of an alternative like "|ff01" or "|ff01|aa".
+-- | Parse the "tail" of an alternative like @|ff01@ or @|ff01|aa@.
 alternativeTail :: Parsec T.Text () HexString
 alternativeTail = Alternative <$> (char '|' *> hexTree `sepBy1` char '|')
 
--- | Parse the "tail" of a range like "-ff". Returns a 'Range' with the first
+-- | Parse the "tail" of a range like @-ff@. Returns a 'Range' with the first
 -- component set to a dummy value, an empty HexTree.
 rangeTail :: Parsec T.Text () HexString
 rangeTail = Range [] <$> (char '-' *> hexTree)
 
--- | Parse a single dot and an optional quantifer like "." or ".{3}". This is an
--- alias for the range expression "(00-ff)" which denotes one random byte.
+-- | Parse a single dot and an optional quantifer like @.@ or @.{3}@. This is an
+-- alias for the range expression @(00-ff)@ which denotes one random byte.
 dot :: Parsec T.Text () HexString
 dot = quantified ([Range [Literal "\NUL"] [Literal "\255"]] <$ char '.')
 
--- | Combine a parser with an optional trailing quantifier like "{3}".
+-- | Combine a parser with an optional trailing quantifier like @{3}@.
 quantified :: Parsec T.Text u HexTree -> Parsec T.Text u HexString
 quantified p = combine <$> p <* ignorable <*> option 1 quantifier
   where
