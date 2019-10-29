@@ -19,6 +19,7 @@ import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
 import Data.ByteString.UTF8 (fromString)
+import Data.Char (toLower)
 import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
@@ -147,10 +148,27 @@ quantified p = combine <$> p <* ignorable <*> option 1 quantifier
     combine :: HexTree -> Int -> HexString
     combine [x] 1 = x
     combine t n = Repetition t n
-    quantifier :: Parsec T.Text u Int
-    quantifier =
-        read <$>
-        (char '{' *> ignorable *> many1 (digit <* ignorable) <* char '}')
+
+-- | Parse a quantifier like @{3}@ or @{32K}@, with optional suffix K (factor
+-- 2^10), M (factor 2^20) or G (factor 2^30).
+quantifier :: Parsec T.Text u Int
+quantifier =
+    combine <$> (char '{' *> ignorable *> number) <*>
+    (suffix <* ignorable <* char '}')
+  where
+    number :: Parsec T.Text u String
+    number = many1 (digit <* ignorable)
+    suffix :: Parsec T.Text u (Maybe Char)
+    suffix = optionMaybe (oneOf "kmgKMG")
+    combine :: String -> Maybe Char -> Int
+    combine s Nothing = read s
+    combine s (Just c) =
+        read s *
+        case (toLower c) of
+            'k' -> 1024
+            'm' -> 1048576
+            'g' -> 1073741824
+            _ -> error "Unexpected error parsing quantifier."
 
 -- | Data type for parser error messages.
 data Error
