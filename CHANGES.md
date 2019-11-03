@@ -1,3 +1,13 @@
+# Release 1.3.0
+
+2019-11-03
+
+  * Hex syntax extension: The new *string* macro allows arbitrary text content
+    inside quotes like `"foo bar"` which produces a UTF-8 encoded byte sequence
+    representing the quoted string content.
+  * Hex syntax extension: In *repetition* macros, multiplicative suffixes may
+    now be added to quantifiers like `(00){2M}`, producing 2 MB of NULL bytes.
+
 # Release 1.2.1
 
 2019-09-29
