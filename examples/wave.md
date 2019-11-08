@@ -26,7 +26,7 @@ instance ("WAVE" in this case), followed by the remaining chunks described
 below.
 
     52494646 # chunk ID "RIFF"
-    24f40000 # chunk size
+    24fa0000 # chunk size
     57415645 # chunk data "WAVE"
 
 Note that since the chunk data comprises all the rest of the file the chunk size
