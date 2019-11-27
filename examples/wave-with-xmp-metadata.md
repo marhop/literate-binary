@@ -1,12 +1,13 @@
 This document describes a WAVE file with embedded XMP metadata in ["literate
 binary"][lb] notation, integrating handcrafted binary (expressed as hex code)
-and documentation written in Markdown syntax. Two different representations can
-be derived from this document:
+with documentation written in [Markdown][Markdown]. Two different
+representations can be derived from this document:
 
  1. A PDF/HTML/Latex ... file, using a Markdown converter like [Pandoc][Pandoc].
  2. A binary WAVE file, using the [`lb` tool][lb].
 
 [lb]: https://github.com/marhop/literate-binary
+[Markdown]: https://commonmark.org/
 [Pandoc]: https://pandoc.org/
 
 # WAVE file example with XMP metadata

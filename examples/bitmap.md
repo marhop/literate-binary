@@ -1,12 +1,14 @@
-This file describes a simple BMP, or Bitmap Image File in hexadecimal notation.
-It is an example for a ["literate binary"][lb] file that integrates handcrafted
-binary and documentation. Two different representations can be derived from this
-file (see end of file for usage examples):
+This document describes a simple BMP, or Bitmap Image File in ["literate
+binary"][lb] notation, integrating handcrafted binary (expressed as hex code)
+with documentation written in [Markdown][Markdown]. Two different
+representations can be derived from this document:
 
- 1. A PDF/HTML/Latex ... file, using a Markdown converter like Pandoc.
- 2. A binary BMP file, using [`lb`][lb]. This takes the hex code from all
-    Markdown code blocks and transforms it into binary that can be opened in any
-    suitable image viewer.
+ 1. A PDF/HTML/Latex ... file, using a Markdown converter like [Pandoc][Pandoc].
+ 2. A binary BMP file, using the [`lb` tool][lb].
+
+[lb]: https://github.com/marhop/literate-binary
+[Markdown]: https://commonmark.org/
+[Pandoc]: https://pandoc.org/
 
 # BMP File Example
 
@@ -114,5 +116,3 @@ $ lb bitmap.md --output binary.bmp
 
 Note that the preceding code block will *not* be part of a binary file created
 by `lb`. It will be ignored because of the `.nobin` class.
-
-[lb]: https://github.com/marhop/literate-binary

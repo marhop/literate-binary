@@ -1,3 +1,15 @@
+This document describes a ZIP file with a data descriptor in ["literate
+binary"][lb] notation, integrating handcrafted binary (expressed as hex code)
+with documentation written in [Markdown][Markdown]. Two different
+representations can be derived from this document:
+
+ 1. A PDF/HTML/Latex ... file, using a Markdown converter like [Pandoc][Pandoc].
+ 2. A binary ZIP file, using the [`lb` tool][lb].
+
+[lb]: https://github.com/marhop/literate-binary
+[Markdown]: https://commonmark.org/
+[Pandoc]: https://pandoc.org/
+
 # ZIP File Example With Data Descriptor
 
 Data descriptors are special records in a ZIP file that are intended to
