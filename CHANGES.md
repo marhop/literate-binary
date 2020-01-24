@@ -6,7 +6,7 @@
     inside quotes like `"foo bar"` which produces a UTF-8 encoded byte sequence
     representing the quoted string content.
   * Hex syntax extension: In *repetition* macros, multiplicative suffixes may
-    now be added to quantifiers like `(00){2M}`, producing 2 MB of NULL bytes.
+    now be added to quantifiers like `(00){2M}`, producing 2 MiB of NULL bytes.
 
 # Release 1.2.1
 

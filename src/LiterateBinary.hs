@@ -34,8 +34,8 @@
 --
 --   * A /repetition/ of the form @(x){n}@. This translates to the ByteString
 --     corresponding to x, repeated n times. The integer n may be followed by a
---     multiplicative suffix @K@ (factor 2^10), @M@ (factor 2^20), or @G@
---     (factor 2^30).
+--     multiplicative suffix @K@ (factor 2^10, KiB), @M@ (factor 2^20, MiB), or
+--     @G@ (factor 2^30, GiB).
 --   * An /alternative/ of the form @(x|...|y)@. This translates to the
 --     ByteString corresponding to either x or ... or y, selected randomly.
 --   * A /range/ of the form @(x-y)@. This translates to one random ByteString

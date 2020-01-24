@@ -41,9 +41,9 @@ and a positive integer n, the following macros are valid hex strings as well:
 
   * A *repetition* of the form `(x){n}`. This translates to the byte sequence
     corresponding to x, repeated n times. The integer n may be followed by a
-    multiplicative suffix `K` (factor 2¹⁰), `M` (factor 2²⁰), or `G` (factor
-    2³⁰). Examples: `(00ff){3}` → `00ff00ff00ff`, `(00){2M}` → 2 MB of NULL
-    bytes
+    multiplicative suffix `K` (factor 2¹⁰, KiB), `M` (factor 2²⁰, MiB), or `G`
+    (factor 2³⁰, GiB). Examples: `(00ff){3}` → `00ff00ff00ff`, `(00){2M}` → 2
+    MiB of NULL bytes
   * An *alternative* of the form `(x|...|y)`. This translates to the byte
     sequence corresponding to either x or ... or y, selected randomly. Example:
     `(00|ff|3333)` → one of `00`, `ff` or `3333`
