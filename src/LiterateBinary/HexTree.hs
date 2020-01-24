@@ -1,6 +1,6 @@
 -- |
 -- Module     : LiterateBinary.HexTree
--- Copyright  : (c) Martin Hoppenheit 2019
+-- Copyright  : (c) Martin Hoppenheit 2019-2020
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -29,4 +29,8 @@ data HexString
     -- | A range like @(x-y)@, with HexTrees @x@, @y@.
     | Range HexTree
             HexTree
+    -- | A single random byte, represented by the special range @.@. This is
+    -- equivalent to @(00-ff)@ but can be evaluated more efficiently than a
+    -- general range.
+    | Byte
     deriving (Show)

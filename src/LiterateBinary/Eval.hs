@@ -1,6 +1,6 @@
 -- |
 -- Module     : LiterateBinary.Eval
--- Copyright  : (c) Martin Hoppenheit 2019
+-- Copyright  : (c) Martin Hoppenheit 2019-2020
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -12,11 +12,11 @@ module LiterateBinary.Eval
     ) where
 
 import Control.Monad.State (State, evalState, state)
-import Data.ByteString.Builder (Builder, byteString, toLazyByteString)
+import Data.ByteString.Builder (Builder, byteString, toLazyByteString, word8)
 import qualified Data.ByteString.Lazy as BL
 import Data.Semigroup (stimes)
 import Data.String.Conversions (cs)
-import System.Random (RandomGen, randomR)
+import System.Random (RandomGen, random, randomR)
 
 import Data.ByteString.Enumeration (randomInRange)
 import LiterateBinary.HexTree (HexString(..), HexTree)
@@ -37,6 +37,7 @@ eval' [Range t1 t2] = do
     b1 <- cs . toLazyByteString <$> eval' t1
     b2 <- cs . toLazyByteString <$> eval' t2
     byteString <$> state (randomInRange (b1, b2))
+eval' [Byte] = word8 <$> state random
 eval' [] = return mempty
 eval' (x:xs) = mappend <$> eval' [x] <*> eval' xs
 
@@ -46,6 +47,7 @@ isRandom (Literal _) = False
 isRandom (Repetition t _) = any isRandom t
 isRandom (Alternative _) = True
 isRandom (Range _ _) = True
+isRandom Byte = True
 
 -- | Take a random element from a list.
 randomL :: RandomGen g => [a] -> State g (Maybe a)

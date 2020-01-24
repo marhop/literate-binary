@@ -2,7 +2,7 @@
 
 -- |
 -- Module     : LiterateBinary.Parse
--- Copyright  : (c) Martin Hoppenheit 2019
+-- Copyright  : (c) Martin Hoppenheit 2019-2020
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -139,7 +139,7 @@ rangeTail = Range [] <$> (char '-' *> hexTree)
 -- | Parse a single dot and an optional quantifer like @.@ or @.{3}@. This is an
 -- alias for the range expression @(00-ff)@ which denotes one random byte.
 dot :: Parsec T.Text () HexString
-dot = quantified ([Range [Literal "\NUL"] [Literal "\255"]] <$ char '.')
+dot = quantified ([Byte] <$ char '.')
 
 -- | Combine a parser with an optional trailing quantifier like @{3}@.
 quantified :: Parsec T.Text u HexTree -> Parsec T.Text u HexString
@@ -164,7 +164,7 @@ quantifier =
     combine s Nothing = read s
     combine s (Just c) =
         read s *
-        case (toLower c) of
+        case toLower c of
             'k' -> 1024
             'm' -> 1048576
             'g' -> 1073741824
