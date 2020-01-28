@@ -1,3 +1,9 @@
+# Release 1.3.1
+
+2020-01-28
+
+  * Performance improvements for dot syntax (`.`).
+
 # Release 1.3.0
 
 2019-11-03
