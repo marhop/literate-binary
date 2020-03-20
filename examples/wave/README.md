@@ -12,10 +12,10 @@ be derived from these documents:
 
 The following files are available:
 
-  * [wave.md][wave.md] - a basic WAVE file, including an introduction to the
+  * [wave.md](wave.md) - a basic WAVE file, including an introduction to the
     file format (start here!)
-  * [broadcast-wave.md][broadcast-wave.md] - a Broadcast Wave Format (BWF) file
-  * [multiple-channel-wave.md][multiple-channel-wave.md] - a WAVE file with
+  * [broadcast-wave.md](broadcast-wave.md) - a Broadcast Wave Format (BWF) file
+  * [multiple-channel-wave.md](multiple-channel-wave.md) - a WAVE file with
     multiple audio channels, using the WAVE_FORMAT_EXTENSIBLE extension
-  * [wave-with-xmp-metadata.md][wave-with-xmp-metadata.md] - a WAVE file with
+  * [wave-with-xmp-metadata.md](wave-with-xmp-metadata.md) - a WAVE file with
     added XMP metadata
