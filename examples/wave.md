@@ -37,9 +37,9 @@ A chunk of this type is common to all RIFF based formats. Its chunk ID is
 instance ("WAVE" in this case), followed by the remaining chunks described
 below.
 
-    52494646 # chunk ID "RIFF"
-    24fa0000 # chunk size
-    57415645 # chunk data "WAVE"
+    "RIFF"   # chunk ID
+    44620500 # chunk size
+    "WAVE"   # chunk data
 
 Note that since the chunk data comprises all the rest of the file the chunk size
 equals file size minus 8.
@@ -49,7 +49,7 @@ equals file size minus 8.
 The format chunk is specific to WAVE files. Its chunk ID is "fmt " (note the
 trailing whitespace).
 
-    666d7420 # chunk ID "fmt "
+    "fmt "   # chunk ID
     10000000 # chunk size
 
 The chunk data is composed of several fields with a size of two or four bytes
@@ -64,38 +64,38 @@ each that describe the format of the payload in the data chunk below.
 
         0200
 
- 3. The sampling rate. 8000 (0x1f40) samples per second.
+ 3. The sampling rate. 44100 (0xac44) samples per second (44.1 kHz) are defined
+    as "CD quality".
 
-        401f0000
+        44ac0000
 
-    Other common sampling rates include 44100 (CD quality), 48000, and 192000
-    samples per second.
+    Other common sampling rates include 48000 and 192000 samples per second.
 
  4. The average number of bytes per second. The RIFF specification defines this
     as channels × bits per second × bytes per sample, but obviously it should be
     samples per second (i.e., sampling rate) instead of bits per second. See
     field 6 below for the number of bytes per sample.
 
-    2 × 8000 × 1 = 16000 = 0x3e80
+    2 × 44100 × 2 = 176400 = 0x2b110
 
-        803e0000
+        10b10200
 
  5. The block alignment, that is, how many bytes have to be read for playback of
     each sample: number of channels × bytes per sample.
 
-    2 × 1 = 2
+    2 × 2 = 4
 
-        0200
+        0400
 
- 6. The number of bits per sample, also known as bit depth. One byte for each
-    sample of audio data.
+ 6. The number of bits per sample, also known as bit depth. Two bytes (16 bits)
+    for each sample of audio data are defined as "CD quality".
 
-        0800
+        1000
 
-    Other bit depths like 16 bits (CD quality) are possible, but there is an
-    inconsistency in the RIFF specification: If one to eight bits are used this
-    value is interpreted as an unsigned integer, but with more than eight bits
-    it is interpreted as a signed integer ...
+    Other bit depths like 8 or 24 bits are possible, but there is an
+    inconsistency in the RIFF specification: If one to eight bits are used the
+    samples in the data chunk below are interpreted as unsigned integers, but
+    with more than eight bits they are interpreted as signed integers ...
 
 The two most important pieces of information for interpretation of the data
 chunk are fields 3 and 6, sampling rate and bit depth. These are the central
@@ -112,47 +112,70 @@ this][waveforms].) Consequently, digital representation of sound is a matter of
 encoding a waveform in binary. With [pulse code modulation][PCM], this requires
 two steps called [sampling] and [quantization]. First, the waveform is sampled
 at regular, uniform intervals, resulting in a list of values. The length of this
-list depends on the sampling rate; a sampling rate of 8000 samples per second
-obviously yields 8000 values per second of sound per channel. Second, the
+list depends on the sampling rate; a sampling rate of 44100 samples per second
+obviously yields 44100 values per second of sound per channel. Second, the
 samples are mapped (or rounded, if you will) to the available range of numbers.
-This range is determined by the bit depth; with a bit depth of 8 bits per
-sample, the samples can be mapped to 2⁸ = 256 different numbers.
+This range is determined by the bit depth; with a bit depth of 16 bits per
+sample, the samples can be mapped to 2¹⁶ = 65536 different numbers.
 
 The chunk data of a PCM WAVE data chunk consists of a simple series of quantized
 waveform samples. Samples for multiple channels are interleaved, so two lists of
-samples (c11, c12, c13, ...) and (c21, c22, c23, ...) representing two audio
-channels become (c11, c21, c12, c22, c13, c23, ...) in the chunk data. In this
-example, both stereo channels play the same sound so each pair of samples
-consists of the same two bytes. (Yes, that's like mono with doubled memory
-usage. It's just an example!)
+samples (a₀, a₁, a₂, ...) and (b₀, b₁, b₂, ...) representing two audio channels
+become (a₀, b₀, a₁, b₁, a₂, b₂, ...) in the chunk data.
 
-    64617461 # chunk ID "data"
-    00fa0000 # chunk size
+    "data"   # chunk ID
+    20620500 # chunk size
 
-    # 80 stereo samples repeated 100 times = 8000 samples = 1 second at 100 Hz
-    (7f7f 8989 9393 9d9d a6a6 b0b0 b9b9 c1c1 caca d1d1 d9d9 e0e0 e6e6 ebeb f0f0
-    f4f4 f8f8 fafa fcfc fefe fefe fefe fcfc fafa f8f8 f4f4 f0f0 ebeb e6e6 e0e0
-    d9d9 d1d1 caca c1c1 b9b9 b0b0 a6a6 9d9d 9393 8989 7f7f 7575 6b6b 6161 5858
-    4e4e 4545 3d3d 3434 2d2d 2525 1e1e 1818 1313 0e0e 0a0a 0606 0404 0202 0000
-    0000 0000 0202 0404 0606 0a0a 0e0e 1313 1818 1e1e 2525 2d2d 3434 3d3d 4545
-    4e4e 5858 6161 6b6b 7575){100}
+    # one second, 441 Hz sine tone, left channel
+    ( 0000 0000 0908 0000 0b10 0000 fc17 0000 d51f 0000
+      8e27 0000 1e2f 0000 8036 0000 aa3d 0000 9544 0000
+      3c4b 0000 9651 0000 9f57 0000 4e5d 0000 9f62 0000
+      8d67 0000 126c 0000 2a70 0000 d073 0000 0277 0000
+      bb79 0000 fa7b 0000 bb7d 0000 fd7e 0000 be7f 0000
+      ff7f 0000 be7f 0000 fd7e 0000 bb7d 0000 fa7b 0000
+      bb79 0000 0277 0000 d073 0000 2a70 0000 126c 0000
+      8d67 0000 9f62 0000 4e5d 0000 9f57 0000 9651 0000
+      3c4b 0000 9544 0000 aa3d 0000 8036 0000 1e2f 0000
+      8e27 0000 d51f 0000 fc17 0000 0b10 0000 0908 0000
+      0000 0000 f7f7 0000 f5ef 0000 04e8 0000 2be0 0000
+      72d8 0000 e2d0 0000 80c9 0000 56c2 0000 6bbb 0000
+      c4b4 0000 6aae 0000 61a8 0000 b2a2 0000 619d 0000
+      7398 0000 ee93 0000 d68f 0000 308c 0000 fe88 0000
+      4586 0000 0684 0000 4582 0000 0381 0000 4280 0000
+      0180 0000 4280 0000 0381 0000 4582 0000 0684 0000
+      4586 0000 fe88 0000 308c 0000 d68f 0000 ee93 0000
+      7398 0000 619d 0000 b2a2 0000 61a8 0000 6aae 0000
+      c4b4 0000 6bbb 0000 56c2 0000 80c9 0000 e2d0 0000
+      72d8 0000 2be0 0000 04e8 0000 f5ef 0000 f7f7 0000
+    ){441}
 
-    # 40 stereo samples repeated 200 times = 8000 samples = 1 second at 200 Hz
-    (7f7f 9393 a6a6 b9b9 caca d9d9 e6e6 f0f0 f8f8 fcfc fefe fcfc f8f8 f0f0 e6e6
-    d9d9 caca b9b9 a6a6 9393 7f7f 6b6b 5858 4545 3434 2525 1818 0e0e 0606 0202
-    0000 0202 0606 0e0e 1818 2525 3434 4545 5858 6b6b){200}
-
-    # 20 stereo samples repeated 400 times = 8000 samples = 1 second at 400 Hz
-    (7f7f a6a6 caca e6e6 f8f8 fefe f8f8 e6e6 caca a6a6 7f7f 5858 3434 1818 0606
-    0000 0606 1818 3434 5858){400}
-
-    # 10 stereo samples repeated 800 times = 8000 samples = 1 second at 800 Hz
-    (7f7f caca f8f8 f8f8 caca 7f7f 3434 0606 0606 3434){800}
+    # one second, 441 Hz sine tone, right channel
+    ( 0000 0000 0000 0908 0000 0b10 0000 fc17 0000 d51f
+      0000 8e27 0000 1e2f 0000 8036 0000 aa3d 0000 9544
+      0000 3c4b 0000 9651 0000 9f57 0000 4e5d 0000 9f62
+      0000 8d67 0000 126c 0000 2a70 0000 d073 0000 0277
+      0000 bb79 0000 fa7b 0000 bb7d 0000 fd7e 0000 be7f
+      0000 ff7f 0000 be7f 0000 fd7e 0000 bb7d 0000 fa7b
+      0000 bb79 0000 0277 0000 d073 0000 2a70 0000 126c
+      0000 8d67 0000 9f62 0000 4e5d 0000 9f57 0000 9651
+      0000 3c4b 0000 9544 0000 aa3d 0000 8036 0000 1e2f
+      0000 8e27 0000 d51f 0000 fc17 0000 0b10 0000 0908
+      0000 0000 0000 f7f7 0000 f5ef 0000 04e8 0000 2be0
+      0000 72d8 0000 e2d0 0000 80c9 0000 56c2 0000 6bbb
+      0000 c4b4 0000 6aae 0000 61a8 0000 b2a2 0000 619d
+      0000 7398 0000 ee93 0000 d68f 0000 308c 0000 fe88
+      0000 4586 0000 0684 0000 4582 0000 0381 0000 4280
+      0000 0180 0000 4280 0000 0381 0000 4582 0000 0684
+      0000 4586 0000 fe88 0000 308c 0000 d68f 0000 ee93
+      0000 7398 0000 619d 0000 b2a2 0000 61a8 0000 6aae
+      0000 c4b4 0000 6bbb 0000 56c2 0000 80c9 0000 e2d0
+      0000 72d8 0000 2be0 0000 04e8 0000 f5ef 0000 f7f7
+    ){441}
 
 Of course, real-world waveform samples are not generated manually but by systems
-called [ADC]. But for the sake of example, this file contains four genuine
-handmade beeps. The remaining paragraphs explain how the samples in the
-preceding code block were obtained.
+called [ADC]. But for the sake of example, this file contains a genuine handmade
+beep, playing for one second on each of the two stereo channels. The remaining
+paragraphs explain how the samples in the preceding code block were obtained.
 
 In one of its simplest forms a waveform visualizing sound takes the shape of the
 sine function which is periodic, meaning it repeats its values in regular
@@ -163,47 +186,55 @@ repetitions per second, the frequency, is measured in Hertz (Hz), so an 800 Hz
 tone has a higher pitch than a 200 Hz tone. (Do not confuse this frequency with
 the sampling rate which is also given in Hertz sometimes!)
 
-Consider the tone that corresponds to a 200 Hz sine waveform. The waveform has
-200 cycles per second, so using a sampling rate of 8000 samples per second one
-second of this tone would be represented by 200 repetitions of a pattern
-consisting of 8000/200 = 40 samples. (Contrast this with a 400 Hz sine waveform
-that needs 400 repetitions of 8000/400 = 20 samples.) Since the sine function is
-periodic with period 2π the 40 samples representing one cylce are sin(0),
-sin((1/40) × 2π), sin((2/40) × 2π), ..., sin((39/40) × 2π). Quantizing these
-values to a bit depth of 8 bits yields the bytes in the code block above.
+Consider [a standard 440 Hz sine tone][A440]. Even better, consider a 441 Hz
+sine tone because in this example the math works out better for 441 Hz. The
+waveform corresponding to that tone has 441 cycles per second, so using a
+sampling rate of 44100 samples per second one second of this tone is represented
+by 441 repetitions of a pattern consisting of 44100/441 = 100 samples. Since the
+sine function is periodic with period 2π the 100 samples representing one cycle
+are sin(0), sin(1/100 × 2π), sin(2/100 × 2π), ..., sin(99/100 × 2π). Quantizing
+these values to the ±32767 range induced by a bit depth of 16 bits (actually the
+lower bound is -32768, but never mind) and encoding the numbers in little endian
+[two's complement][twos-compl] representation yields the bytes in the code block
+above.
 
-Here are some values for the 200 Hz (40 samples) example, where sample(x) =
-sin((x/40) × 2π) and quantized(y) = 127 + round(127 × y):
+Here are some example values, where sample(x) = sin(x/100 × 2π), quantized(y) =
+round(y × 32767) and hex is the little endian two's complement representation of
+that number.
 
-x  | sample              | quantized | hex
----|---------------------|-----------|----
-0  | 0.0                 | 127       | 7f
-1  | 0.15643446504023087 | 147       | 93
-2  | 0.3090169943749474  | 166       | a6
-   | ...                 | ...       | ...
-39 | -0.1564344650402311 | 107       | 6b
+ x |               sample | quantized |  hex
+---|----------------------|-----------|-----
+ 0 |  0.0                 |         0 | 0000
+ 1 |  0.06279051952931337 |      2057 | 0908
+ 2 |  0.12533323356430426 |      4107 | 0b10
+99 | -0.06279051952931326 |     -2057 | f7f7
 
-And finally, here is the Haskell program that was used to generate the hex
-patterns in the code block above (something equivalent could be done in any
-other programming language, of course):
+So according to this table the first few samples of a 441 Hz sine tone sampled
+at 44.1 kHz, 16 bit are `0000`, `0908`, `0b10`, ... But looking at the code
+block above there are a lot of additional NULL bytes between the sine values
+like in `0000 0000 0908 0000 0b10 0000`. Remember the samples for the two stereo
+channels are interleaved, meaning this sequence represents the left channel
+`0000 0908 0b10` and the right channel `0000 0000 0000`. So while the left
+channel plays the 441 Hz sine tone the right channel plays sound corresponding
+to a waveform consisting of a sequence of constant 0 values. This of course is
+not very wavy at all, and it produces just -- silence.
+
+And finally, just for the record, here is the Haskell program that was used to
+generate the hex patterns in the code block above (something equivalent could be
+done in any programming language, of course):
 
 ~~~ {.nobin}
+import Data.List.Split (chunksOf)
 import Text.Printf
 
-main = putStr $ patterns [80, 40, 20, 10]
+main :: IO ()
+main = putStrLn . unwords $ map le16hex samples
 
-patterns = unlines . map (unwords . map fmt . samples)
+samples :: [Int]
+samples = [round (sin (x / 100 * 2 * pi) * 32767) | x <- [0 .. 99]]
 
--- | Create x samples of one cycle of the sine function, quantized to integer
--- values in the 8 bit range (0..256).
-samples x = map (quant . sample . (/ x)) [0 .. (x - 1)]
-  where
-    sample x = sin $ x * 2 * pi
-    quant x = 127 + round (127 * x)
-
--- | Format number as hex string. Twice, because redundant stereo.
-fmt :: Integer -> String
-fmt x = printf "%02x%02x" x x
+le16hex :: Int -> String
+le16hex = concat . reverse . chunksOf 2 . printf "%04hx"
 ~~~
 
 [waveforms]: https://pudding.cool/2018/02/waveforms/
@@ -211,3 +242,14 @@ fmt x = printf "%02x%02x" x x
 [sampling]: https://en.wikipedia.org/wiki/Sampling_(signal_processing)
 [quantization]: https://en.wikipedia.org/wiki/Quantization_(signal_processing)
 [ADC]: https://en.wikipedia.org/wiki/Analog-to-digital_converter
+[A440]: https://en.wikipedia.org/wiki/A440_(pitch_standard)
+[twos-compl]: https://en.wikipedia.org/wiki/Two%27s_complement
+
+# Further reading
+
+  * [A detailed description of the WAVE file format][gem].
+  * [A concise overview of the WAVE file format][mcgill], with copies of the
+    relevant format specifications.
+
+[mcgill]: http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+[gem]: https://wavefilegem.com/how_wave_files_work.html
