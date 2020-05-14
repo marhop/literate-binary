@@ -12,5 +12,5 @@ be derived from these documents:
 
 The following files are available:
 
-* [tiff-bilevel.md](tiff-bilevel.md) - a basic bilevel (black/white) TIFF file,
+* [bilevel-tiff.md](bilevel-tiff.md) - a basic bilevel (black/white) TIFF file,
   including an introduction to the file format (start here!)
