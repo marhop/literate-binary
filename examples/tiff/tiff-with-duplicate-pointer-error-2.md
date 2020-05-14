@@ -68,6 +68,6 @@ This is illegal as per the TIFF specification:**
 Just some black/white dummy image data. By referencing this four times from the
 StripOffsets array the image data is repeated four times.
 
-    (ff){2K} (00){2K} (00){2K} (ff){2K} # 256 rows, 256 columns, black/white
+    (ff){2K} (00){4K} (ff){2K} # 256 rows, 256 columns, black/white
 
 [TIFF]: https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
