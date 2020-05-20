@@ -14,6 +14,8 @@ The following files are available:
 
 * [bilevel-tiff.md](bilevel-tiff.md) - a basic bilevel (black/white) TIFF file,
   including an introduction to the file format (start here!)
+* [grayscale-tiff.md](grayscale-tiff.md) - a basic grayscale TIFF file,
+  including an introduction to the file format (alternatively, start here!)
 * [tiff-with-duplicate-pointer-error-1.md](tiff-with-duplicate-pointer-error-1.md) -
   a file that violates the TIFF specification because of a duplicate pointer in
   the XResolution and YResolution fields
