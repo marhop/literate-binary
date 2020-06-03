@@ -295,7 +295,7 @@ the IFD.
 The actual image data is a sequence of bytes that has to be interpreted
 according to the information in the IFD above. In this example that means the
 image data is uncompressed and encodes a 512 × 256 pixels image in such a way
-that each byte carries color information for one pixel in from of an index into
+that each byte carries color information for one pixel in form of an index into
 the palette (ColorMap).
 
 The binary layout of the image data is where it gets interesting:
