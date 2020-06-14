@@ -75,7 +75,7 @@ import LiterateBinary.Parse (Error, parseHex, parseMarkdown, showError)
 
 -- | Convert hex string in Markdown code blocks to ByteString.
 compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
-compile g t = parseMarkdown t >>= compilePlain g
+compile g t = compilePlain g $ parseMarkdown t
 
 -- | Convert hex string in Markdown code blocks to ByteString.
 compileIO :: T.Text -> IO (Either Error BL.ByteString)

@@ -23,11 +23,10 @@ executable lb
   build-depends:       base
                      , base16-bytestring
                      , bytestring
+                     , cmark
                      , containers
                      , mtl
                      , optparse-applicative
-                     , pandoc
-                     , pandoc-types
                      , parsec
                      , random
                      , string-conversions

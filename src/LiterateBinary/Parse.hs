@@ -15,6 +15,7 @@ module LiterateBinary.Parse
     , showError
     ) where
 
+import CMark (Node(..), NodeType(CODE_BLOCK), commonmarkToNode)
 import Data.Bifunctor (bimap, first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
@@ -23,24 +24,20 @@ import Data.Char (toLower)
 import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
-import qualified Text.Pandoc as P
-import Text.Pandoc.Walk (query)
 import Text.Parsec
 import Text.Parsec.Error (errorMessages, showErrorMessages)
 
 import LiterateBinary.HexTree (HexString(..), HexTree)
 
 -- | Extract content from code blocks in a Markdown document.
-parseMarkdown :: T.Text -> Either Error T.Text
-parseMarkdown =
-    bimap MkdParseError (T.unlines . query blocks) .
-    P.runPure . P.readMarkdown P.def
+parseMarkdown :: T.Text -> T.Text
+parseMarkdown = T.unlines . blocks . commonmarkToNode []
   where
-    blocks :: P.Block -> [T.Text]
-    blocks (P.CodeBlock (_, classes, _) code)
-        | "nobin" `elem` classes = []
-        | otherwise = [cs code]
-    blocks _ = []
+    blocks :: Node -> [T.Text]
+    blocks (Node _ (CODE_BLOCK info code) _)
+        | ".nobin" `T.isInfixOf` info = []
+        | otherwise = [code]
+    blocks (Node _ _ xs) = concatMap blocks xs
 
 -- | Parse hex string including macros, creating an AST.
 parseHex :: T.Text -> Either Error HexTree
@@ -171,14 +168,14 @@ quantifier =
             _ -> error "Unexpected error parsing quantifier."
 
 -- | Data type for parser error messages.
-data Error
-    = MkdParseError { pandocErr :: P.PandocError }
-    | HexParseError { src :: T.Text
-                    , parsecErr :: ParseError }
+data Error =
+    HexParseError
+        { src :: T.Text
+        , parsecErr :: ParseError
+        }
 
 -- | Format a parser error message.
 showError :: Error -> T.Text
-showError (MkdParseError e) = cs $ show e
 showError (HexParseError t e) = label <> src <> parsecMsg
   where
     label = "invalid syntax in hex string "
