@@ -1,7 +1,6 @@
 module Main where
 
 import qualified Data.ByteString.Lazy as BL
-import Data.Semigroup ((<>))
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Options.Applicative

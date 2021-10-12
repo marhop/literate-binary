@@ -16,12 +16,11 @@ module LiterateBinary.Parse
     ) where
 
 import CMark (Node(..), NodeType(CODE_BLOCK), commonmarkToNode)
-import Data.Bifunctor (bimap, first)
+import Data.Bifunctor (first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decode)
 import Data.ByteString.UTF8 (fromString)
 import Data.Char (toLower)
-import Data.Semigroup ((<>))
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
 import Text.Parsec
@@ -163,18 +162,14 @@ quantifier =
             'g' -> 1073741824
             _ -> error "Unexpected error parsing quantifier."
 
--- | Data type for parser error messages.
-data Error =
-    HexParseError
-        { src :: T.Text
-        , parsecErr :: ParseError
-        }
+-- | Data type for parser error messages (source + error).
+data Error = HexParseError T.Text ParseError
 
 -- | Format a parser error message.
 showError :: Error -> T.Text
-showError (HexParseError t e) = label <> src <> parsecMsg
+showError (HexParseError t e) = lbl <> src <> parsecMsg
   where
-    label = "invalid syntax in hex string "
+    lbl = "invalid syntax in hex string "
     src = quote $ T.lines t !! (sourceLine (errorPos e) - 1)
     parsecMsg =
         cs .
