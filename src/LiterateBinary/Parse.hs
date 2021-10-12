@@ -67,11 +67,7 @@ hexLiteral :: Parsec T.Text () HexString
 hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
   where
     bytes :: String -> BS.ByteString
-    bytes s =
-        let (bs, err) = decode (cs s)
-         in if BS.null err
-                then bs
-                else error "Unexpected error converting hex to bytes."
+    bytes s = either (error . ((cs s <> ", ") <>)) id $ decode (cs s)
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
