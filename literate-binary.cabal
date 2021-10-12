@@ -20,15 +20,15 @@ executable lb
                      , LiterateBinary.Eval
                      , LiterateBinary.HexTree
                      , LiterateBinary.Parse
-  build-depends:       base
-                     , base16-bytestring
-                     , bytestring
-                     , cmark
-                     , containers
-                     , mtl
-                     , optparse-applicative
-                     , parsec
-                     , random
-                     , string-conversions
-                     , text
-                     , utf8-string
+  build-depends:       base == 4.12.0.0
+                     , base16-bytestring == 0.1.1.6
+                     , bytestring == 0.10.8.2
+                     , cmark == 0.6
+                     , containers == 0.6.0.1
+                     , mtl == 2.2.2
+                     , optparse-applicative == 0.14.3.0
+                     , parsec == 3.1.14.0
+                     , random == 1.1
+                     , string-conversions == 0.4.0.1
+                     , text == 1.2.3.1
+                     , utf8-string == 1.0.1.1
