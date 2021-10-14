@@ -22,7 +22,7 @@ executable lb
                      , LiterateBinary.HexTree
                      , LiterateBinary.Parse
   build-depends:       base >= 4.12 && < 5
-                     , base16-bytestring >= 1.0.0.0 && < 1.1
+                     , base16 >= 0.3.0.1 && < 0.4
                      , bytestring >= 0.10.8.2 && < 0.12
                      , cmark >= 0.6 && < 0.7
                      , containers >= 0.6.0.1 && < 0.7
