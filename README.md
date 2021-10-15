@@ -93,16 +93,13 @@ examples, misuse of format specifications, ...) are greatly appreciated!
 
 # Building from source
 
-This tool is written in Haskell. It is recommended to use [Stack] for building.
-Install Stack, clone the Git repository, change to its top level directory and
-run the following commands:
+This tool is written in Haskell, so you need GHC (compiler) and Cabal (build
+tool), best installed with [ghcup] if you use a Unix-like OS. Clone the Git
+repository, change to its top level directory and run the following commands to
+build and optionally install the `lb` binary:
 
-    $ stack setup
-    $ stack build
-    $ stack install
-
-This will install the `lb` executable to `~/.local/bin/` on Linux and to
-`%AppData%\local\bin` on Windows.
+    $ cabal build
+    $ cabal install
 
 [Markdown]: https://daringfireball.net/projects/markdown/basics
 [Pandoc]: https://pandoc.org
@@ -111,4 +108,4 @@ This will install the `lb` executable to `~/.local/bin/` on Linux and to
 [example]: examples/bitmap/bitmap.md
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
 [fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
-[Stack]: https://docs.haskellstack.org/
+[ghcup]: https://www.haskell.org/ghcup/
