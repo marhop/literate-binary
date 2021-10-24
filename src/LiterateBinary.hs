@@ -66,24 +66,24 @@ module LiterateBinary
   )
 where
 
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.Text as T
+import Data.ByteString.Lazy (ByteString)
+import Data.Text (Text)
 import LiterateBinary.Eval (eval)
 import LiterateBinary.Parse (Error, parseHex, parseMarkdown, showError)
 import System.Random (RandomGen, newStdGen)
 
 -- | Convert hex string in Markdown code blocks to ByteString.
-compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
+compile :: RandomGen g => g -> Text -> Either Error ByteString
 compile g t = compilePlain g $ parseMarkdown t
 
 -- | Convert hex string in Markdown code blocks to ByteString.
-compileIO :: T.Text -> IO (Either Error BL.ByteString)
+compileIO :: Text -> IO (Either Error ByteString)
 compileIO t = flip compile t <$> newStdGen
 
 -- | Convert plain hex string to ByteString.
-compilePlain :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
+compilePlain :: RandomGen g => g -> Text -> Either Error ByteString
 compilePlain g t = eval g <$> parseHex t
 
 -- | Convert plain hex string to ByteString.
-compilePlainIO :: T.Text -> IO (Either Error BL.ByteString)
+compilePlainIO :: Text -> IO (Either Error ByteString)
 compilePlainIO t = flip compilePlain t <$> newStdGen

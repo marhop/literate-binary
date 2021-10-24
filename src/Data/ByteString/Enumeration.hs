@@ -20,11 +20,12 @@
 module Data.ByteString.Enumeration (range, randomInRange) where
 
 import Data.Bifunctor (first)
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import System.Random (RandomGen, randomR)
 
 -- | Create a range of ByteStrings based on start and end values.
-range :: BS.ByteString -> BS.ByteString -> [BS.ByteString]
+range :: ByteString -> ByteString -> [ByteString]
 range x y
   | x `gt` y = range y x
   | otherwise = takeWhile (not . (`gt` y)) $ iterate succ' x
@@ -33,7 +34,7 @@ range x y
 -- function is more efficient than creating a (potentially large) list with
 -- 'range' and then taking a random element from it.
 randomInRange ::
-  RandomGen g => (BS.ByteString, BS.ByteString) -> g -> (BS.ByteString, g)
+  RandomGen g => (ByteString, ByteString) -> g -> (ByteString, g)
 randomInRange (x, y)
   | x `gt` y = randomInRange (y, x)
   | otherwise = first toEnum' . randomR (fromEnum' x, fromEnum' y)
@@ -49,7 +50,7 @@ randomInRange (x, y)
 -- > succ' 00ff == 0100
 -- > succ' mempty == 00
 -- > succ' ff == 0000 /= 0100
-succ' :: BS.ByteString -> BS.ByteString
+succ' :: ByteString -> ByteString
 succ' =
   maybe
     (BS.singleton 0x00)
@@ -66,7 +67,7 @@ succ' =
 --   * x is longer than y or
 --   * x and y have equal length and x > y in terms of the Ord instance for
 --     ByteStrings.
-gt :: BS.ByteString -> BS.ByteString -> Bool
+gt :: ByteString -> ByteString -> Bool
 gt x y = (compare (BS.length x) (BS.length y) <> compare x y) == GT
 
 -- | Like the regular 'fromEnum' function but Integer typed. The mapping from
@@ -79,12 +80,12 @@ gt x y = (compare (BS.length x) (BS.length y) <> compare x y) == GT
 -- > fromEnum' 0000 == 257
 -- > fromEnum' 00ff == 512
 -- > fromEnum' 0100 == 513
-fromEnum' :: BS.ByteString -> Integer
+fromEnum' :: ByteString -> Integer
 fromEnum' = BS.foldl' (\acc x -> 256 * acc + fromIntegral x + 1) 0
 
 -- | Like the regular 'toEnum' function but Integer typed. This is the inverse
 -- of fromEnum'.
-toEnum' :: Integer -> BS.ByteString
+toEnum' :: Integer -> ByteString
 toEnum' 0 = mempty
 toEnum' x
   | x < 0 = error "Unexpected error converting Integer to ByteString."

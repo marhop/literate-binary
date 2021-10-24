@@ -1,7 +1,8 @@
 module Main where
 
+import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.Text as T
+import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import LiterateBinary (Error, compileIO, compilePlainIO, showError)
 import Options.Applicative
@@ -46,11 +47,11 @@ runCompiler opts =
     >>= either writeError (writeOutput opts)
 
 -- | Read input from a file or from STDIN.
-readInput :: Options -> IO T.Text
+readInput :: Options -> IO Text
 readInput = maybe TIO.getContents TIO.readFile . optInput
 
 -- | Write output to a file or to STDOUT.
-writeOutput :: Options -> BL.ByteString -> IO ()
+writeOutput :: Options -> ByteString -> IO ()
 writeOutput = maybe BL.putStr BL.writeFile . optOutput
 
 -- | Write error to STDERR.

@@ -11,14 +11,14 @@ module LiterateBinary.Eval (eval) where
 import Control.Monad.State (State, evalState, state)
 import Data.ByteString.Builder (Builder, byteString, toLazyByteString, word8)
 import Data.ByteString.Enumeration (randomInRange)
-import qualified Data.ByteString.Lazy as BL
+import Data.ByteString.Lazy (ByteString)
 import Data.Semigroup (stimes)
 import Data.String.Conversions (cs)
 import LiterateBinary.HexTree (HexString (..), HexTree)
 import System.Random (RandomGen, random, randomR)
 
 -- | Synthesize bit stream from AST.
-eval :: RandomGen g => g -> HexTree -> BL.ByteString
+eval :: RandomGen g => g -> HexTree -> ByteString
 eval g t = toLazyByteString $ evalState (eval' t) g
 
 -- | Create ByteString builder from AST.

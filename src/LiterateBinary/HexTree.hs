@@ -8,7 +8,7 @@
 -- parsing.
 module LiterateBinary.HexTree (HexTree, HexString (..)) where
 
-import qualified Data.ByteString as BS
+import Data.ByteString (ByteString)
 
 -- | The AST is just a list of 'HexString' values.
 type HexTree = [HexString]
@@ -16,7 +16,7 @@ type HexTree = [HexString]
 -- | A single AST element.
 data HexString
   = -- | A hex literal like @00ff@.
-    Literal BS.ByteString
+    Literal ByteString
   | -- | A repetition like @(x){3}@, with HexTree @x@.
     Repetition HexTree Int
   | -- | An alternative like @(x|y|z)@, with HexTrees @x@, @y@, @z@.
