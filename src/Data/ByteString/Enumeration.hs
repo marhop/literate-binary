@@ -1,6 +1,6 @@
 -- |
 -- Module     : Data.ByteString.Enumeration
--- Copyright  : (c) Martin Hoppenheit 2019
+-- Copyright  : (c) Martin Hoppenheit 2019-2021
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -17,11 +17,7 @@
 -- Ord instance for ByteString: The enumeration contains the sequence @[..., ff,
 -- 0000, ...]@, but @ff > 0000@. See also <https://stackoverflow.com/a/10356655>
 -- for a similar example.
-
-module Data.ByteString.Enumeration
-    ( range
-    , randomInRange
-    ) where
+module Data.ByteString.Enumeration (range, randomInRange) where
 
 import Data.Bifunctor (first)
 import qualified Data.ByteString as BS
@@ -30,17 +26,17 @@ import System.Random (RandomGen, randomR)
 -- | Create a range of ByteStrings based on start and end values.
 range :: BS.ByteString -> BS.ByteString -> [BS.ByteString]
 range x y
-    | x `gt` y = range y x
-    | otherwise = takeWhile (not . (`gt` y)) $ iterate succ' x
+  | x `gt` y = range y x
+  | otherwise = takeWhile (not . (`gt` y)) $ iterate succ' x
 
 -- | Create one random ByteString in a range based on start and end values. This
 -- function is more efficient than creating a (potentially large) list with
 -- 'range' and then taking a random element from it.
 randomInRange ::
-       RandomGen g => (BS.ByteString, BS.ByteString) -> g -> (BS.ByteString, g)
+  RandomGen g => (BS.ByteString, BS.ByteString) -> g -> (BS.ByteString, g)
 randomInRange (x, y)
-    | x `gt` y = randomInRange (y, x)
-    | otherwise = first toEnum' . randomR (fromEnum' x, fromEnum' y)
+  | x `gt` y = randomInRange (y, x)
+  | otherwise = first toEnum' . randomR (fromEnum' x, fromEnum' y)
 
 -- | Successor function for ByteStrings. Behaves mostly like a chain of succ
 -- applications for a ByteString interpreted as a number would do, with the
@@ -55,13 +51,14 @@ randomInRange (x, y)
 -- > succ' ff == 0000 /= 0100
 succ' :: BS.ByteString -> BS.ByteString
 succ' =
-    maybe
-        (BS.singleton 0x00)
-        (\(xs, x) ->
-             if x < 0xff
-                 then BS.snoc xs (succ x)
-                 else BS.snoc (succ' xs) 0x00) .
-    BS.unsnoc
+  maybe
+    (BS.singleton 0x00)
+    ( \(xs, x) ->
+        if x < 0xff
+          then BS.snoc xs (succ x)
+          else BS.snoc (succ' xs) 0x00
+    )
+    . BS.unsnoc
 
 -- | Modified "greater than" comparison for ByteStrings that takes the length of
 -- a ByteString into account. Given two ByteStrings x and y, @x `gt` y@ iff
@@ -90,8 +87,8 @@ fromEnum' = BS.foldl' (\acc x -> 256 * acc + fromIntegral x + 1) 0
 toEnum' :: Integer -> BS.ByteString
 toEnum' 0 = mempty
 toEnum' x
-    | x < 0 = error "Unexpected error converting Integer to ByteString."
-    | m == 0 = BS.snoc (toEnum' (d - 1)) 255
-    | otherwise = BS.snoc (toEnum' d) (fromIntegral m - 1)
+  | x < 0 = error "Unexpected error converting Integer to ByteString."
+  | m == 0 = BS.snoc (toEnum' (d - 1)) 255
+  | otherwise = BS.snoc (toEnum' d) (fromIntegral m - 1)
   where
     (d, m) = x `divMod` 256

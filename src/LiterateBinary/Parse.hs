@@ -2,20 +2,14 @@
 
 -- |
 -- Module     : LiterateBinary.Parse
--- Copyright  : (c) Martin Hoppenheit 2019-2020
+-- Copyright  : (c) Martin Hoppenheit 2019-2021
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
 -- Parser functions for "LiterateBinary".
+module LiterateBinary.Parse (parseMarkdown, parseHex, Error, showError) where
 
-module LiterateBinary.Parse
-    ( parseMarkdown
-    , parseHex
-    , Error
-    , showError
-    ) where
-
-import CMark (Node(..), NodeType(CODE_BLOCK), commonmarkToNode)
+import CMark (Node (..), NodeType (CODE_BLOCK), commonmarkToNode)
 import Data.Bifunctor (first)
 import qualified Data.ByteString as BS
 import Data.ByteString.Base16 (decodeBase16)
@@ -23,10 +17,9 @@ import Data.ByteString.UTF8 (fromString)
 import Data.Char (toLower)
 import Data.String.Conversions (cs)
 import qualified Data.Text as T
+import LiterateBinary.HexTree (HexString (..), HexTree)
 import Text.Parsec
 import Text.Parsec.Error (errorMessages, showErrorMessages)
-
-import LiterateBinary.HexTree (HexString(..), HexTree)
 
 -- | Extract content from code blocks in a Markdown document.
 parseMarkdown :: T.Text -> T.Text
@@ -34,8 +27,8 @@ parseMarkdown = T.unlines . blocks . commonmarkToNode []
   where
     blocks :: Node -> [T.Text]
     blocks (Node _ (CODE_BLOCK info code) _)
-        | ".nobin" `T.isInfixOf` info = []
-        | otherwise = [code]
+      | ".nobin" `T.isInfixOf` info = []
+      | otherwise = [code]
     blocks (Node _ _ xs) = concatMap blocks xs
 
 -- | Parse hex string including macros, creating an AST.
@@ -73,10 +66,10 @@ hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
 -- six or ... times.
 many2 :: Stream s m t => ParsecT s u m a -> ParsecT s u m [a]
 many2 p = do
-    x1 <- p
-    x2 <- p
-    xs <- option [] (many2 p)
-    return (x1 : x2 : xs)
+  x1 <- p
+  x2 <- p
+  xs <- option [] (many2 p)
+  return (x1 : x2 : xs)
 
 -- | Parse a quoted string literal like @"ASCII string"@ or @'ASCII string'@ and
 -- an optional quantifier. Both single and double quotes are allowed. The quote
@@ -92,8 +85,7 @@ strLiteral = quantified (pure <$> (quoted '"' <|> quoted '\''))
 -- escaped by another backslash.
 quoted :: Char -> Parsec T.Text () HexString
 quoted q =
-    Literal . fromString <$>
-    (char q *> many (escape q <|> noneOf [q]) <* char q)
+  Literal . fromString <$> (char q *> many (escape q <|> noneOf [q]) <* char q)
 
 -- | Parse a given character preceded (i.e., escaped) by a backslash, or a
 -- double backslash (i.e., an escaped backslash).
@@ -111,7 +103,7 @@ parenExpr = quantified (char '(' *> innerParenExpr <* char ')')
 -- a range respectively.
 innerParenExpr :: Parsec T.Text () HexTree
 innerParenExpr =
-    combine <$> hexTree <*> optionMaybe (alternativeTail <|> rangeTail)
+  combine <$> hexTree <*> optionMaybe (alternativeTail <|> rangeTail)
   where
     combine :: HexTree -> Maybe HexString -> HexTree
     combine t Nothing = t
@@ -145,8 +137,8 @@ quantified p = combine <$> p <* ignorable <*> option 1 quantifier
 -- 2^10), M (factor 2^20) or G (factor 2^30).
 quantifier :: Parsec T.Text u Int
 quantifier =
-    combine <$> (char '{' *> ignorable *> number) <*>
-    (suffix <* ignorable <* char '}')
+  combine
+    <$> (char '{' *> ignorable *> number) <*> (suffix <* ignorable <* char '}')
   where
     number :: Parsec T.Text u String
     number = many1 (digit <* ignorable)
@@ -155,12 +147,11 @@ quantifier =
     combine :: String -> Maybe Char -> Int
     combine s Nothing = read s
     combine s (Just c) =
-        read s *
-        case toLower c of
-            'k' -> 1024
-            'm' -> 1048576
-            'g' -> 1073741824
-            _ -> error "Unexpected error parsing quantifier."
+      read s * case toLower c of
+        'k' -> 1024
+        'm' -> 1048576
+        'g' -> 1073741824
+        _ -> error "Unexpected error parsing quantifier."
 
 -- | Data type for parser error messages (source + error).
 data Error = HexParseError T.Text ParseError
@@ -172,14 +163,14 @@ showError (HexParseError t e) = lbl <> src <> parsecMsg
     lbl = "invalid syntax in hex string "
     src = quote $ T.lines t !! (sourceLine (errorPos e) - 1)
     parsecMsg =
-        cs .
-        showErrorMessages
-            "or"
-            "unknown parse error"
-            "expecting"
-            "unexpected"
-            "end of input" $
-        errorMessages e
+      cs
+        . showErrorMessages
+          "or"
+          "unknown parse error"
+          "expecting"
+          "unexpected"
+          "end of input"
+        $ errorMessages e
 
 -- | Quote a text using single quotes. No escaping!
 quote :: T.Text -> T.Text

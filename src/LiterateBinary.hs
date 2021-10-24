@@ -1,6 +1,6 @@
 -- |
 -- Module     : LiterateBinary
--- Copyright  : (c) Martin Hoppenheit 2019
+-- Copyright  : (c) Martin Hoppenheit 2019-2021
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -56,22 +56,21 @@
 --
 -- Whitespace including line breaks as well as comments (@# ...@ until end of
 -- line) are ignored in a hex string.
-
 module LiterateBinary
-    ( compile
-    , compileIO
-    , compilePlain
-    , compilePlainIO
-    , Error
-    , showError
-    ) where
+  ( compile,
+    compileIO,
+    compilePlain,
+    compilePlainIO,
+    Error,
+    showError,
+  )
+where
 
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Text as T
-import System.Random (RandomGen, newStdGen)
-
 import LiterateBinary.Eval (eval)
 import LiterateBinary.Parse (Error, parseHex, parseMarkdown, showError)
+import System.Random (RandomGen, newStdGen)
 
 -- | Convert hex string in Markdown code blocks to ByteString.
 compile :: RandomGen g => g -> T.Text -> Either Error BL.ByteString
