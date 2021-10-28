@@ -156,6 +156,7 @@ quantifier =
 
 -- | Data type for parser error messages (source + error).
 data Error = HexParseError Text ParseError
+  deriving (Show, Eq)
 
 -- | Format a parser error message.
 showError :: Error -> Text

@@ -27,4 +27,4 @@ data HexString
     -- equivalent to @(00-ff)@ but can be evaluated more efficiently than a
     -- general range.
     Byte
-  deriving (Show)
+  deriving (Show, Eq)
