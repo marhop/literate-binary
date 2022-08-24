@@ -34,10 +34,10 @@ together. All other content including inline code in backticks `` `like this` ``
 is ignored. The code blocks must contain nothing but hex strings, whitespace and
 comments. The set of valid hex strings is defined as follows:
 
-Each sequence of hex characters (0-9, A-F, upper or lower case) with equal
-length like `00ff` is a valid hex string; each pair of characters in this
-sequence translates to one byte in the usual fashion. Given hex strings x and y
-and a positive integer n, the following macros are valid hex strings as well:
+Each sequence of hex characters (0-9, A-F, upper or lower case) with even length
+like `00ff` is a valid hex string; each pair of characters in this sequence
+translates to one byte in the usual fashion. Given hex strings x and y and a
+positive integer n, the following macros are valid hex strings as well:
 
   * A *repetition* of the form `(x){n}`. This translates to the byte sequence
     corresponding to x, repeated n times. The integer n may be followed by a
