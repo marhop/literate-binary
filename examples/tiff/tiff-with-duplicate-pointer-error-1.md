@@ -73,4 +73,4 @@ Just some black/white dummy image data.
     (00){4K} (ff){4K} # second strip, 64 white + 64 black rows
     (ff){4K}          # third strip, 64 black rows
 
-[TIFF]: https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
+[TIFF]: https://archive.org/details/TIFF6

@@ -258,4 +258,4 @@ green and `00 00 ff` for blue.
     (00ff00){2700} # second strip, 30 green rows
     (0000ff){2700} # third strip, 30 blue rows
 
-[TIFF]: https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
+[TIFF]: https://archive.org/details/TIFF6

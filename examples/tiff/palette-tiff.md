@@ -428,4 +428,4 @@ index 0 to index 255.
     (f8){512} (f9){512} (fa){512} (fb){512}
     (fc){512} (fd){512} (fe){512} (ff){512}
 
-[TIFF]: https://www.adobe.io/content/dam/udp/en/open/standards/tiff/TIFF6.pdf
+[TIFF]: https://archive.org/details/TIFF6
