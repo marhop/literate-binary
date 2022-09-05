@@ -1,0 +1,24 @@
+name: Build
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        ghc: ["9.2.1"]
+        cabal: ["3.6"]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haskell/actions/setup@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: cabal install -O2 --installdir bin
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lb_${{ runner.os }}
+          path: ./bin
