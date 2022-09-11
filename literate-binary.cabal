@@ -1,13 +1,13 @@
 cabal-version:      3.0
 name:               literate-binary
-version:            1.3.1
+version:            1.3.2
 synopsis:           Integrate handcrafted binary and documentation
 homepage:           https://github.com/marhop/literate-binary
 license:            MIT
 license-file:       LICENSE
 author:             Martin Hoppenheit
 maintainer:         martin@hoppenheit.info
-copyright:          2018-2021 Martin Hoppenheit
+copyright:          2018-2022 Martin Hoppenheit
 extra-source-files: README.md CHANGES.md
 
 source-repository head
