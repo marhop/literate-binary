@@ -75,7 +75,8 @@ there are several others in the [examples/](examples/) directory.
 
 # Usage
 
-Get a binary [here][releases] and put it in your PATH. Then:
+Get a binary [here][releases] and put it in your PATH (and, if necessary, make
+it executable -- hint: `chmod u+x lb`). Then:
 
     $ lb --help
     $ lb source.bmp.md --output binary.bmp
