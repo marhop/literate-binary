@@ -24,7 +24,12 @@ content.
                     lb     -> binary.bmp
 
 Obviously, this is inspired by [Donald Knuth's ideas on literate
-programming](https://en.wikipedia.org/wiki/Literate_programming).
+programming](https://en.wikipedia.org/wiki/Literate_programming); hence the
+name.
+
+There are several example files in the [examples/](examples/) directory. I have
+also written a [long blog post][blog] that explains how to build a TIFF file
+using literate binary.
 
 # Syntax
 
@@ -70,9 +75,6 @@ It is possible to exclude single code blocks from processing; [fenced code
 blocks] with the `.nobin` class are ignored by `lb`. This can be used to add
 code other than binary, or to "comment out" a whole code block.
 
-[Here is a complete example][example] describing a simple Bitmap image file;
-there are several others in the [examples/](examples/) directory.
-
 # Usage
 
 Get a binary [here][releases] and put it in your PATH (and, if necessary, make
@@ -107,6 +109,7 @@ build and optionally install the `lb` binary:
 [lb]: https://github.com/marhop/literate-binary
 [releases]: https://github.com/marhop/literate-binary/releases
 [example]: examples/bitmap/bitmap.md
+[blog]: https://martin.hoppenheit.info/blog/2022/writing-binary-by-hand/
 [code blocks]: https://pandoc.org/MANUAL.html#verbatim-code-blocks
 [fenced code blocks]: https://pandoc.org/MANUAL.html#fenced-code-blocks
 [ghcup]: https://www.haskell.org/ghcup/
