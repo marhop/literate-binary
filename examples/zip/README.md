@@ -14,6 +14,7 @@ The following files are available:
 
   * [zip.md](zip.md) - a basic ZIP file, including an introduction to the file
     format (start here!)
+  * [empty-zip.md](empty-zip.md) - an empty ZIP file
   * [zip64.md](zip64.md) - a ZIP64 file
   * [zip-with-data-descriptor.md](zip-with-data-descriptor.md) - a ZIP file
     using a data descriptor, which is a rather special feature
