@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 jobs:
   build:
-    name: ${{ matrix.os }}
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -12,13 +12,13 @@ jobs:
         ghc: ["9.2.1"]
         cabal: ["3.6"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: haskell/actions/setup@v1
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: cabal install -O2 --installdir bin
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: lb_${{ runner.os }}
           path: ./bin
