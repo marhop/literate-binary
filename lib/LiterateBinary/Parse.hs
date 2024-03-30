@@ -12,7 +12,7 @@ module LiterateBinary.Parse (parseMarkdown, parseHex, Error, showError) where
 import CMark (Node (..), NodeType (CODE_BLOCK), commonmarkToNode)
 import Data.Bifunctor (first)
 import Data.ByteString (ByteString)
-import Data.ByteString.Base16 (decodeBase16)
+import Data.ByteString.Base16 (decodeBase16Untyped)
 import Data.ByteString.UTF8 (fromString)
 import Data.Char (toLower)
 import Data.String.Conversions (cs)
@@ -60,7 +60,8 @@ hexLiteral :: Parsec Text () HexString
 hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
   where
     bytes :: String -> ByteString
-    bytes s = either (error . (<> ", " <> s) . cs) id $ decodeBase16 (cs s)
+    bytes s =
+      either (error . (<> ", " <> s) . cs) id $ decodeBase16Untyped (cs s)
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
