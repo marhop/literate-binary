@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ["9.2.1"]
-        cabal: ["3.6"]
+        ghc: ["9.6"]
+        cabal: ["3.10"]
     steps:
       - uses: actions/checkout@v4
       - uses: haskell-actions/setup@v2
@@ -18,7 +18,7 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: cabal install -O2 --installdir bin
-      - run: tar -cf lb.tar --dereference -C bin .
+      - run: tar -czf lb.tar.gz --dereference -C bin .
       - uses: actions/upload-artifact@v4
         with:
           name: lb-${{ runner.os }}
