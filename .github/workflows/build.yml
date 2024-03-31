@@ -17,6 +17,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
+      - run: cabal update
       - run: cabal install -O2 --installdir bin
       - run: tar -czf lb.tar.gz --dereference -C bin .
       - uses: actions/upload-artifact@v4
