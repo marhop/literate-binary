@@ -22,4 +22,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: lb-${{ runner.os }}
-          path: lb.tar
+          path: lb.tar.gz
