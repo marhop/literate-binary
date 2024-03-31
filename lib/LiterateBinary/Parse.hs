@@ -2,7 +2,7 @@
 
 -- |
 -- Module     : LiterateBinary.Parse
--- Copyright  : (c) Martin Hoppenheit 2019-2021
+-- Copyright  : (c) Martin Hoppenheit 2019-2024
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -15,7 +15,6 @@ import Data.ByteString (ByteString)
 import Data.ByteString.Base16 (decodeBase16Untyped)
 import Data.ByteString.UTF8 (fromString)
 import Data.Char (toLower)
-import Data.String.Conversions (cs)
 import Data.Text (Text)
 import qualified Data.Text as T
 import LiterateBinary.HexTree (HexString (..), HexTree)
@@ -61,7 +60,8 @@ hexLiteral = Literal . bytes <$> many2 (hexDigit <* ignorable)
   where
     bytes :: String -> ByteString
     bytes s =
-      either (error . (<> ", " <> s) . cs) id $ decodeBase16Untyped (cs s)
+      either (error . (<> ", " <> s) . T.unpack) id $
+        decodeBase16Untyped (fromString s)
 
 -- | Apply a parser an even number of times, at least twice. This is like
 -- @Parsec.many1@, but the parser is not applied one or more, but two or four or
@@ -166,7 +166,7 @@ showError (HexParseError t e) = lbl <> src <> parsecMsg
     lbl = "invalid syntax in hex string "
     src = quote $ T.lines t !! (sourceLine (errorPos e) - 1)
     parsecMsg =
-      cs
+      T.pack
         . showErrorMessages
           "or"
           "unknown parse error"

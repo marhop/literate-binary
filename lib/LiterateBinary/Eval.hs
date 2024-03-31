@@ -1,6 +1,6 @@
 -- |
 -- Module     : LiterateBinary.Eval
--- Copyright  : (c) Martin Hoppenheit 2019-2021
+-- Copyright  : (c) Martin Hoppenheit 2019-2024
 -- License    : MIT
 -- Maintainer : martin@hoppenheit.info
 --
@@ -11,9 +11,8 @@ module LiterateBinary.Eval (eval) where
 import Control.Monad.State (State, evalState, state)
 import Data.ByteString.Builder (Builder, byteString, toLazyByteString, word8)
 import Data.ByteString.Enumeration (randomInRange)
-import Data.ByteString.Lazy (ByteString)
+import Data.ByteString.Lazy (ByteString, toStrict)
 import Data.Semigroup (stimes)
-import Data.String.Conversions (cs)
 import LiterateBinary.HexTree (HexString (..), HexTree)
 import System.Random (RandomGen, random, randomR)
 
@@ -30,8 +29,8 @@ eval' [Repetition t n]
   | otherwise = stimes n <$> eval' t
 eval' [Alternative ts] = randomL ts >>= maybe (return mempty) eval'
 eval' [Range t1 t2] = do
-  b1 <- cs . toLazyByteString <$> eval' t1
-  b2 <- cs . toLazyByteString <$> eval' t2
+  b1 <- toStrict . toLazyByteString <$> eval' t1
+  b2 <- toStrict . toLazyByteString <$> eval' t2
   byteString <$> state (randomInRange (b1, b2))
 eval' [Byte] = word8 <$> state random
 eval' [] = return mempty
