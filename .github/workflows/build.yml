@@ -18,8 +18,8 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: cabal install -O2 --installdir bin
-      - run: tar -czf lb.tar.gz --dereference -C bin .
+      - run: tar -czf literate-binary-${{ runner.os }}.tar.gz --dereference -C bin .
       - uses: actions/upload-artifact@v4
         with:
-          name: lb-${{ runner.os }}
-          path: lb.tar.gz
+          name: literate-binary-${{ runner.os }}
+          path: literate-binary-${{ runner.os }}.tar.gz
