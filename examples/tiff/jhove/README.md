@@ -13,6 +13,7 @@ $ lb tiff-hul-26.md -o tiff-hul-26.tif
 
 Example files for the following JHOVE errors are available:
 
+- [TIFF-HUL-3 "Unknown data type"][TIFF-HUL-3] ([tiff-hul-3.md](tiff-hul-3.md))
 - [TIFF-HUL-26 "StripOffsets not defined"][TIFF-HUL-26]
   ([tiff-hul-26.md](tiff-hul-26.md))
 - [TIFF-HUL-27 "StripByteCounts not defined"][TIFF-HUL-27]
@@ -23,5 +24,6 @@ Example files for the following JHOVE errors are available:
 [lb]: https://github.com/marhop/literate-binary
 [Markdown]: https://commonmark.org/
 
+[TIFF-HUL-3]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-3
 [TIFF-HUL-26]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-26
 [TIFF-HUL-27]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-27
