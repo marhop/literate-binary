@@ -30,5 +30,6 @@ Example files for the following JHOVE errors are available:
 
 [TIFF-HUL-3]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-3
 [TIFF-HUL-7]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-7
+[TIFF-HUL-8]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-8
 [TIFF-HUL-26]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-26
 [TIFF-HUL-27]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-27
