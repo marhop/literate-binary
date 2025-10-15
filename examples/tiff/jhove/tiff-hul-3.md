@@ -65,6 +65,7 @@ Just some red/green/blue dummy image data.
     (0000ff){2700} # third strip, 30 blue rows
 
 [lb]: https://github.com/marhop/literate-binary
+[Markdown]: https://commonmark.org/
 [TIFF]: https://archive.org/details/TIFF6
 [JHOVE]: https://jhove.openpreservation.org/
 [TIFF-HUL-3]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-3
