@@ -23,6 +23,13 @@ Example files for the following JHOVE errors are available:
 - [TIFF-HUL-27 "StripByteCounts not defined"][TIFF-HUL-27]:
   [tiff-hul-27.md](tiff-hul-27.md)
 
+These examples are *not* real-world files collected "in the wild", and some of
+the errors described here are not likely to be encountered in this isolated form
+in practice. The files have been manually created for testing and research with
+the explicit intention to raise these errors. They have deliberately been kept
+small and simple, with little additional noise, to focus, where possible, on
+exactly one error per file.
+
 [TIFF]: https://archive.org/details/TIFF6
 [JHOVE]: https://jhove.openpreservation.org/
 [lb]: https://github.com/marhop/literate-binary
