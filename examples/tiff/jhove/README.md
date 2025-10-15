@@ -13,11 +13,13 @@ $ lb tiff-hul-26.md -o tiff-hul-26.tif
 
 Example files for the following JHOVE errors are available:
 
-- [TIFF-HUL-3 "Unknown data type"][TIFF-HUL-3] ([tiff-hul-3.md](tiff-hul-3.md))
-- [TIFF-HUL-26 "StripOffsets not defined"][TIFF-HUL-26]
-  ([tiff-hul-26.md](tiff-hul-26.md))
-- [TIFF-HUL-27 "StripByteCounts not defined"][TIFF-HUL-27]
-  ([tiff-hul-27.md](tiff-hul-27.md))
+- [TIFF-HUL-3 "Unknown data type"][TIFF-HUL-3], [tiff-hul-3.md](tiff-hul-3.md)
+- [TIFF-HUL-7 "Type mismatch for tag x; expecting y, saw z"][TIFF-HUL-7],
+  [tiff-hul-7.md](tiff-hul-7.md)
+- [TIFF-HUL-26 "StripOffsets not defined"][TIFF-HUL-26],
+  [tiff-hul-26.md](tiff-hul-26.md)
+- [TIFF-HUL-27 "StripByteCounts not defined"][TIFF-HUL-27],
+  [tiff-hul-27.md](tiff-hul-27.md)
 
 [TIFF]: https://archive.org/details/TIFF6
 [JHOVE]: https://jhove.openpreservation.org/
@@ -25,5 +27,6 @@ Example files for the following JHOVE errors are available:
 [Markdown]: https://commonmark.org/
 
 [TIFF-HUL-3]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-3
+[TIFF-HUL-7]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-7
 [TIFF-HUL-26]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-26
 [TIFF-HUL-27]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-27
