@@ -22,6 +22,8 @@ Example files for the following JHOVE errors are available:
   [tiff-hul-26.md](tiff-hul-26.md)
 - [TIFF-HUL-27 "StripByteCounts not defined"][TIFF-HUL-27]:
   [tiff-hul-27.md](tiff-hul-27.md)
+- [TIFF-HUL-60 "More than 50 IFDs in chain, probably an infinite
+  loop"][TIFF-HUL-60]: [tiff-hul-60.md](tiff-hul-60.md)
 
 These examples are *not* real-world files collected "in the wild", and some of
 the errors described here are not likely to be encountered in this isolated form
@@ -40,3 +42,4 @@ exactly one error per file.
 [TIFF-HUL-8]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-8
 [TIFF-HUL-26]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-26
 [TIFF-HUL-27]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-27
+[TIFF-HUL-60]: https://github.com/openpreserve/jhove/wiki/TIFF-hul-Messages#tiff-hul-60
